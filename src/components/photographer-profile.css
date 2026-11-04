@@ -1,0 +1,510 @@
+.photographer-profile {
+  --profile-paper: #e6e3da;
+  --profile-muted: #a0a69c;
+  --profile-line: #353b34;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #535e51 #121613;
+  background: #121613;
+  color: var(--profile-paper);
+  font-family: 'DM Sans', sans-serif;
+  isolation: isolate;
+}
+.photographer-profile button,
+.photographer-profile a {
+  -webkit-tap-highlight-color: transparent;
+}
+.photographer-profile button:focus-visible,
+.photographer-profile a:focus-visible {
+  outline: 1px solid #c8b28a;
+  outline-offset: 7px;
+}
+.photographer-profile-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 84px;
+  padding: 0 clamp(24px, 4vw, 76px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid #353b347d;
+  background: #121613f5;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.photographer-profile-brand {
+  display: block;
+  width: 220px;
+  min-width: 0;
+  padding: 0;
+}
+.photographer-profile-context {
+  margin-right: auto;
+  margin-left: 18px;
+  color: #8e998c;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+.photographer-profile-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.photographer-profile-back {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0;
+  color: #c2c7bb;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  transition: color 180ms ease;
+}
+.photographer-profile-back:hover {
+  color: #fffaf0;
+}
+.photographer-profile-main {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: clamp(48px, 5.6vw, 96px) clamp(24px, 5vw, 88px) 0;
+}
+.photographer-profile-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.93fr) minmax(0, 1.07fr);
+  grid-template-areas: 'portrait introduction' 'portrait story';
+  column-gap: clamp(44px, 6.2vw, 104px);
+  row-gap: 32px;
+  align-items: start;
+}
+.photographer-profile-portrait {
+  grid-area: portrait;
+  position: sticky;
+  top: 116px;
+  margin: 0;
+  align-self: start;
+}
+.photographer-profile-portrait-image {
+  aspect-ratio: 0.8;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #252b24;
+  border: 1px solid #30362f;
+}
+.photographer-profile-portrait-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 28%;
+}
+.photographer-profile-initials {
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(100px, 13vw, 220px);
+  font-weight: 400;
+  letter-spacing: -0.09em;
+  color: #576052;
+}
+.photographer-profile-portrait-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 14px;
+  color: #8c9688;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.photographer-profile-portrait-caption a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  transition: color 180ms ease;
+}
+.photographer-profile-portrait-caption a:hover {
+  color: #d6dbc9;
+}
+.photographer-profile-introduction {
+  grid-area: introduction;
+  padding-top: 0;
+}
+.photographer-profile h1 {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(64px, 7.1vw, 118px);
+  line-height: 1.01;
+  font-weight: 400;
+  letter-spacing: -0.07em;
+  outline: none;
+}
+.photographer-profile h1 > span {
+  display: block;
+}
+.photographer-profile-headline {
+  margin: 31px 0 0;
+  color: #d2d5c8;
+  font-size: clamp(19px, 1.55vw, 25px);
+  line-height: 1.42;
+  font-weight: 400;
+  letter-spacing: -0.45px;
+}
+.photographer-profile-intro {
+  max-width: 52ch;
+  margin: 23px 0 0;
+  color: #acb4a7;
+  font-size: 15px;
+  line-height: 1.85;
+}
+.photographer-profile-story {
+  grid-area: story;
+  border-top: 1px solid var(--profile-line);
+  padding-top: 29px;
+}
+.photographer-profile-biography {
+  max-width: 58ch;
+  color: #9ca796;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.photographer-profile-biography p {
+  margin: 0 0 20px;
+}
+.photographer-profile-biography p:last-child {
+  margin-bottom: 0;
+}
+.photographer-profile-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 29px 28px;
+  margin: 33px 0 0;
+  padding-top: 28px;
+  border-top: 1px solid var(--profile-line);
+}
+.photographer-profile-facts dt {
+  margin-bottom: 9px;
+  color: #899784;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.photographer-profile-facts dd {
+  margin: 0;
+  color: #d6dccd;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.photographer-profile-works {
+  margin-top: clamp(72px, 8vw, 132px);
+  padding-top: 35px;
+  border-top: 1px solid #434c3e;
+}
+.photographer-profile-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 37px;
+}
+.photographer-profile-section-label {
+  color: #8d9a85;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+.photographer-profile-section-heading h2 {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(29px, 3vw, 45px);
+  font-weight: 400;
+  letter-spacing: -1.7px;
+  line-height: 1.2;
+}
+.photographer-profile-work-list {
+  display: grid;
+  gap: 38px;
+}
+.photographer-profile-work {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.85fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 80px);
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+}
+.photographer-profile-work-image {
+  display: block;
+  overflow: hidden;
+  padding: clamp(26px, 4.3vw, 64px);
+  background: #1c221c;
+  border: 1px solid #2f392d;
+}
+.photographer-profile-work-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 13px;
+  border: 5px solid #070a08;
+  background: #deded2;
+  box-shadow: 9px 14px 24px #0006;
+  transition: transform 400ms ease;
+}
+.photographer-profile-work:hover .photographer-profile-work-image img {
+  transform: scale(1.025);
+}
+.photographer-profile-work-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.photographer-profile-work-place {
+  margin-bottom: 17px;
+  color: #96a18e;
+  font-size: 10px;
+  letter-spacing: 0.35px;
+  line-height: 1.7;
+}
+.photographer-profile-work-artist {
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(30px, 3.2vw, 48px);
+  font-weight: 400;
+  letter-spacing: -1.8px;
+  line-height: 1.2;
+}
+.photographer-profile-work-title {
+  margin-top: 12px;
+  color: #a3ae9a;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.photographer-profile-work-medium {
+  max-width: 30ch;
+  margin-top: 22px;
+  color: #8e9b84;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.photographer-profile-work-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  min-width: 177px;
+  margin-top: 37px;
+  padding: 13px 0;
+  border-bottom: 1px solid #747f69;
+  color: #d1dac4;
+  font-size: 11px;
+  transition: color 180ms ease, border-color 180ms ease;
+}
+.photographer-profile-work:hover .photographer-profile-work-link {
+  color: #fff7e6;
+  border-color: #c0b080;
+}
+.photographer-profile-footer {
+  max-width: 1600px;
+  margin: clamp(64px, 6vw, 96px) auto 0;
+  padding: 25px clamp(24px, 5vw, 88px) 31px;
+  border-top: 1px solid #30392d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+}
+.photographer-profile-sources {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px 19px;
+  color: #85917c;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.photographer-profile-sources > span {
+  color: #a2ad98;
+}
+.photographer-profile-sources a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: underline;
+  text-decoration-color: #56634d;
+  text-underline-offset: 4px;
+}
+.photographer-profile-sources a:hover {
+  color: #e1e7d4;
+}
+@media (min-width: 1800px) {
+  .photographer-profile-header {
+    padding-inline: max(76px, calc((100vw - 1440px) / 2));
+  }
+}
+@media (max-width: 1000px) {
+  .photographer-profile-hero {
+    column-gap: 40px;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+  .photographer-profile h1 {
+    font-size: clamp(58px, 7.6vw, 76px);
+  }
+  .photographer-profile-portrait-caption {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+@media (max-width: 760px) {
+  .photographer-profile-header {
+    height: 72px;
+    padding: 0 22px;
+    gap: 16px;
+  }
+  .photographer-profile-brand {
+    width: 170px;
+  }
+  .photographer-profile-context {
+    display: none;
+  }
+  .photographer-profile-header-actions {
+    gap: 16px;
+  }
+  .photographer-profile-back {
+    font-size: 10px;
+    gap: 8px;
+  }
+  .photographer-profile-main {
+    padding: 42px 24px 0;
+  }
+  .photographer-profile-hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'introduction' 'portrait' 'story';
+    gap: 32px;
+  }
+  .photographer-profile-introduction {
+    padding: 0;
+  }
+  .photographer-profile h1 {
+    font-size: clamp(56px, 12.8vw, 87px);
+    letter-spacing: -0.065em;
+    line-height: 1.04;
+  }
+  .photographer-profile-headline {
+    margin-top: 24px;
+    font-size: 21px;
+    letter-spacing: -0.4px;
+  }
+  .photographer-profile-intro {
+    margin-top: 18px;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .photographer-profile-portrait {
+    position: static;
+  }
+  .photographer-profile-portrait-image {
+    aspect-ratio: 0.84;
+  }
+  .photographer-profile-portrait-caption {
+    flex-direction: row;
+    font-size: 8px;
+  }
+  .photographer-profile-story {
+    padding-top: 25px;
+  }
+  .photographer-profile-biography {
+    font-size: 13px;
+    line-height: 1.85;
+  }
+  .photographer-profile-facts {
+    gap: 25px;
+    padding-top: 25px;
+    margin-top: 28px;
+  }
+  .photographer-profile-works {
+    margin-top: 61px;
+    padding-top: 24px;
+  }
+  .photographer-profile-section-heading {
+    display: block;
+    margin-bottom: 25px;
+  }
+  .photographer-profile-section-heading h2 {
+    margin-top: 12px;
+    font-size: 32px;
+    letter-spacing: -1.2px;
+  }
+  .photographer-profile-work {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 25px;
+  }
+  .photographer-profile-work-image {
+    padding: 25px;
+  }
+  .photographer-profile-work-image img {
+    padding: 10px;
+    border-width: 4px;
+  }
+  .photographer-profile-work-artist {
+    font-size: 36px;
+  }
+  .photographer-profile-work-place {
+    margin-bottom: 10px;
+  }
+  .photographer-profile-work-title {
+    margin-top: 8px;
+  }
+  .photographer-profile-work-medium {
+    margin-top: 14px;
+  }
+  .photographer-profile-work-link {
+    margin-top: 18px;
+  }
+  .photographer-profile-footer {
+    margin-top: 53px;
+    padding: 20px 24px 28px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .photographer-profile-sources {
+    justify-content: flex-start;
+    font-size: 8px;
+    gap: 10px 15px;
+  }
+}
+@media (max-width: 540px) {
+  .photographer-profile-header-actions {
+    gap: 12px;
+  }
+  .photographer-profile-header .photographer-profile-back {
+    width: 32px;
+    padding: 0;
+  }
+  .photographer-profile-header .photographer-profile-back > span {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .photographer-profile *,
+  .photographer-profile *::before,
+  .photographer-profile *::after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

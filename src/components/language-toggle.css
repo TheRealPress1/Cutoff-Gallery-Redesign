@@ -1,0 +1,82 @@
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0;
+  padding: 3px;
+  color: #777e74;
+  border: 1px solid #858e703d;
+}
+.language-toggle button {
+  position: relative;
+  isolation: isolate;
+  min-width: 42px;
+  min-height: 36px;
+  padding: 8px;
+  color: #969d91;
+  font-size: 10px;
+  letter-spacing: 0.7px;
+  transition: color 150ms ease;
+}
+.language-toggle button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+  transition: background-color 150ms ease;
+}
+.language-toggle button[lang="fr"]::before {
+  right: -5px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+.language-toggle button[lang="en"]::before {
+  left: -5px;
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+}
+.language-toggle button[aria-pressed="true"] {
+  color: #eee9dc;
+}
+.language-toggle button[aria-pressed="true"]::before {
+  background: #a68a5c20;
+}
+.language-toggle button:hover { color: #fff8e7; }
+.language-toggle button:focus-visible { outline: 1px solid #c7aa7c; outline-offset: 1px; }
+.modal-language {
+  position: absolute;
+  top: 12px;
+  right: 63px;
+  z-index: 5;
+}
+.modal-language .language-toggle { background: #171b17ed; }
+@media (max-width: 760px) {
+  .site-header > .language-toggle { margin-left: auto; }
+  .language-toggle button { min-width: 36px; min-height: 34px; padding: 7px; }
+  .artwork-modal .print-viewer__eyebrow { top: 62px; }
+}
+@media (max-width: 600px) {
+  .site-shell .site-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 55px 39px;
+    height: 102px;
+    gap: 0 16px;
+    padding: 0 20px 8px;
+  }
+  .site-shell .site-header > .brand { justify-self: start; }
+  .site-shell .site-header > .language-toggle { grid-column: 2; grid-row: 1; }
+  .site-shell .site-header nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0;
+    width: 100%;
+  }
+  .site-shell .site-header .nav-link { font-size: 10px; padding: 10px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .language-toggle button,
+  .language-toggle button::before { transition: none; }
+}

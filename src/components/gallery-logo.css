@@ -1,0 +1,8 @@
+.gallery-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  /* Preserve the original transparent wordmark, reversed for the dark room. */
+  filter: invert(1);
+}
