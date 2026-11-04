@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { bindGalleryPinch } from './galleryPinch.js';
+import { bindGalleryTouch } from './galleryTouch.js';
 import { useLanguage } from '../i18n.jsx';
 import { localizeArtwork } from '../data/translations.js';
 
@@ -305,7 +306,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       return nearest;
     }
     function pointerDown(event) {
-      if (event.button !== 0 || !event.isPrimary || dragging) return;
+      if (event.pointerType === 'touch' || event.button !== 0 || !event.isPrimary || dragging) return;
       dragging = true;
       activePointer = event.pointerId;
       pointerStartedOnArtwork = controlsRef.current.inspecting && hitsAt(event).length > 0;
@@ -316,6 +317,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       renderer.domElement.setPointerCapture?.(event.pointerId);
     }
     function pointerMove(event) {
+      if (event.pointerType === 'touch') return;
       if (dragging) {
         if (event.pointerId !== activePointer) return;
         const dx = event.clientX - lastPointerX;
@@ -348,6 +350,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       }
     }
     function pointerUp(event) {
+      if (event.pointerType === 'touch') return;
       if (!dragging || event.pointerId !== activePointer) return;
       dragging = false;
       activePointer = null;
@@ -361,6 +364,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       }
     }
     function pointerCancel(event) {
+      if (event.pointerType === 'touch') return;
       if (event.pointerId !== activePointer) return;
       dragging = false;
       activePointer = null;
@@ -370,9 +374,21 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     renderer.domElement.addEventListener('pointerup', pointerUp);
     renderer.domElement.addEventListener('pointercancel', pointerCancel);
     renderer.domElement.addEventListener('lostpointercapture', pointerCancel);
+    const touch = bindGalleryTouch(host, {
+      onStart: (event) => controlsRef.current.inspecting && hitsAt(event).length > 0,
+      onTap: (event, startedOnArtwork) => {
+        const current = controlsRef.current;
+        const hit = hitsAt(event)[0];
+        if (current.inspecting) {
+          if (!hit && !startedOnArtwork && document.elementFromPoint(event.clientX, event.clientY) === renderer.domElement) current.onBackgroundClick?.();
+        } else if (hit) current.onSelect?.(hit.object.userData.artworkIndex);
+      },
+      onNavigate: (direction) => controlsRef.current.onNavigate?.(direction),
+    });
     const unbindPinch = bindGalleryPinch(host.parentElement, {
       isSceneTarget: (target) => host.contains(target),
       onStart: () => {
+        touch.cancel();
         const pointerId = activePointer;
         dragging = false;
         activePointer = null;
@@ -500,8 +516,8 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
           : current.t('se trouve à gauche des informations sur l’œuvre', 'is on the left beside the artwork information')
         : current.t('se trouve devant vous', 'is ahead');
       renderer.domElement.setAttribute('aria-label', current.t(
-        `Galerie immersive à l’éclairage tamisé. ${viewed.artist}, ${viewed.year}, ${placement}. Faites glisser pour tourner à 360 degrés ou utilisez les commandes de navigation entre les photographies.`,
-        `Dark museum gallery. ${viewed.artist}, ${viewed.year}, ${placement}. Drag to turn 360 degrees or use the photograph navigation controls.`,
+        `Galerie immersive à l’éclairage tamisé. ${viewed.artist}, ${viewed.year}, ${placement}. Sur écran tactile, balayez vers la gauche ou la droite pour changer de photographie. Avec la souris, faites glisser pour tourner à 360 degrés. Les commandes de navigation sont également disponibles.`,
+        `Dark museum gallery. ${viewed.artist}, ${viewed.year}, ${placement}. On a touchscreen, swipe left or right to change photographs. With a mouse, drag to turn 360 degrees. Photograph navigation controls are also available.`,
       ));
       renderer.render(scene, camera);
       if (Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
@@ -528,6 +544,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', visibilityChange);
       unbindPinch();
+      touch.cleanup();
       renderer.domElement.removeEventListener('pointerdown', pointerDown);
       renderer.domElement.removeEventListener('pointermove', pointerMove);
       renderer.domElement.removeEventListener('pointerup', pointerUp);
@@ -551,8 +568,12 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
   useEffect(() => {
     const host = hostRef.current;
     if (!failed || !host) return undefined;
-    return bindGalleryPinch(host.parentElement, {
+    const touch = bindGalleryTouch(host, {
+      onNavigate: (direction) => controlsRef.current.onNavigate?.(direction),
+    });
+    const unbindPinch = bindGalleryPinch(host.parentElement, {
       isSceneTarget: (target) => host.contains(target),
+      onStart: touch.cancel,
       onZoomIn: () => {
         const current = controlsRef.current;
         if (!current.inspecting) current.onSelect?.(current.activeIndex);
@@ -563,6 +584,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       },
       onNavigate: (direction) => controlsRef.current.onNavigate?.(direction),
     });
+    return () => { unbindPinch(); touch.cleanup(); };
   }, [failed]);
 
   useEffect(() => { invalidateRef.current(true); }, [activeIndex, navigationId, focused, inspecting, reducedMotion, language]);
@@ -571,7 +593,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
   const fallbackBounds = inspecting
     ? compactFallback ? { left: '5%', top: '5.5%', width: '90%', height: '37%' } : { left: '7%', top: '13.5%', width: '50%', height: '73%' }
     : { left: '5%', top: '12.5%', width: '90%', height: '75%' };
-  return <div ref={hostRef} className="gallery-scene" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
+  return <div ref={hostRef} className="gallery-scene" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}>
     {failed && selected && <div onClick={(event) => { if (inspecting && event.target === event.currentTarget) onBackgroundClick?.(); }} style={{ position: 'absolute', inset: 0, background: '#171817', cursor: inspecting ? 'zoom-out' : 'default' }}>
       <button type="button" onClick={(event) => { if (!inspecting) onSelect?.(activeIndex); else if (event.detail > 0 && event.target === event.currentTarget) onBackgroundClick?.(); }} aria-label={t(`Voir ${selected.title}`, `View ${selected.title}`)} style={{ position: 'absolute', ...fallbackBounds, display: 'grid', placeItems: 'center', border: 0, padding: 0, background: 'transparent', cursor: inspecting ? 'default' : 'pointer', transition: reducedMotion ? 'none' : 'left 700ms ease, top 700ms ease, width 700ms ease, height 700ms ease' }}>
         <img src={selected.image} alt={selected.title} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', boxSizing: 'border-box', objectFit: 'contain', display: 'block', border: '6px solid #080909', padding: 20, background: '#e7e4dc', boxShadow: '0 0 70px #fff1c51f' }} />

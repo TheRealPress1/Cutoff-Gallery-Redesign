@@ -12,6 +12,7 @@ npm run dev
 Open the printed preview address. If `localhost` resolves to another local server, use `http://127.0.0.1:5173`.
 
 ```sh
+npm test
 npm run build
 npm run preview
 ```
@@ -39,7 +40,8 @@ vercel deploy --prod --scope timetospammyline-7173s-projects
 - Click a photograph or its museum label to approach it in the room. Its physical frame stays in 3D on the left, with the story, photographer, edition, paper, and dimensions alongside it. On phones, the wall label sits below the work.
 - “Explore the print” opens a separate studio view with front, left, and right frame perspectives. The angled frame is a visualization, not additional product photography.
 - Choose “A closer look” in the studio view, then drag the enlarged photograph to inspect its details. The focused image also supports arrow-key panning. Closing the studio returns to the same place in the room.
-- Drag horizontally to turn freely through 360° around the room. Click any visible photograph from any angle to approach it. The wall label and navigation follow the work you are looking toward; arrows move to the adjacent photograph.
+- On desktop, drag horizontally to turn freely through 360° around the room. Click any visible photograph from any angle to approach it. The wall label and navigation follow the work you are looking toward; arrows move to the adjacent photograph.
+- On touchscreens, swipe left for the next photograph or right for the previous one. Each completed horizontal swipe snaps to one adjacent work, including while inspecting a photograph; the camera stays still under your finger. Taps still approach a work, and vertical scrolling in the information panel remains native.
 - Pinch to approach a photograph or pull back to the room. Scrolling down over the gallery approaches the work; scrolling up returns to the room. The artwork information panel keeps its normal scrolling.
 - Two-finger horizontal trackpad scrolling moves to the previous or next photograph, using the same transition as the keyboard arrows. Each gesture advances once, including its momentum, and keeps the focused view open when inspecting a work.
 - Willy Vainqueur, Denis Rouvre, and Cyril Villemain’s portraits and photographer credits open dedicated profiles at `#/photographers/willy-vainqueur`, `#/photographers/denis-rouvre`, and `#/photographers/cyril-villemain`, with sourced text in French and English and their gallery work. Browser Back and the page’s back action restore the previous viewing context.
