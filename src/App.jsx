@@ -512,6 +512,8 @@ export default function App() {
                   onInquire={inquire}
                   onPhotographer={openPhotographer}
                   onMove={navigate}
+                  immersive={immersive}
+                  onToggleImmersive={() => setImmersive((expanded) => !expanded)}
                 />
               )}
               <div className="gallery-topbar">

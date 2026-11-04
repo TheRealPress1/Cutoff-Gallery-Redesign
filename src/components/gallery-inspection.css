@@ -76,6 +76,9 @@
 .inspection-location {
   color: #919a8d;
 }
+.inspection-mobile-controls {
+  display: none;
+}
 .inspection-description {
   color: #afb6a8;
   font-size: 12px;
@@ -181,7 +184,7 @@
 }
 @media (max-width: 760px) {
   .inspecting-artwork .gallery-expand {
-    top: 14px;
+    display: none;
   }
   .gallery-inspection::before {
     background: linear-gradient(
@@ -192,20 +195,54 @@
     );
   }
   .inspection-back {
-    top: 12px;
-    left: 20px;
-    font-size: 10px;
+    top: 0;
+    left: 6px;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    gap: 0;
+  }
+  .inspection-back > span {
+    display: none;
   }
   .inspection-navigation {
-    left: auto;
-    right: calc(var(--gallery-control-right) + 41px);
-    top: 14px;
-    bottom: auto;
-    gap: 9px;
+    display: none;
   }
-  .inspection-navigation button {
-    width: 32px;
-    height: 32px;
+  .inspection-location-row {
+    position: sticky;
+    top: 10px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    background: #111611f5;
+  }
+  .inspection-location-row .inspection-location {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+  }
+  .inspection-mobile-controls {
+    display: flex;
+    flex-shrink: 0;
+    gap: 4px;
+    color: #d6d9ce;
+  }
+  .inspection-mobile-controls button {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #a1ab9330;
+    background: #12161270;
+  }
+  .inspection-mobile-controls button:hover {
+    background: #323a2f;
+  }
+  .inspection-mobile-controls button:focus-visible {
+    outline: 1px solid #c7aa7c;
+    outline-offset: 2px;
   }
   .inspection-panel {
     top: 47%;
@@ -241,12 +278,29 @@
     padding: 16px 0;
   }
   .gallery-inspection.is-arriving .inspection-panel {
+    /* Controls stay available while the destination's information is hidden. */
+    opacity: 1;
+    visibility: visible;
+    translate: 0;
+    pointer-events: auto;
+  }
+  .inspection-copy {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.65s ease, translate 0.65s ease;
+  }
+  .gallery-inspection.is-arriving .inspection-copy {
+    opacity: 0;
+    visibility: hidden;
     translate: 0 10px;
+    pointer-events: none;
+    transition: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .gallery-inspection::before,
   .inspection-panel,
+  .inspection-copy,
   .inspection-explore svg {
     transition: none;
   }
