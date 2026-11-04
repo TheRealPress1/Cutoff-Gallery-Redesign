@@ -273,7 +273,12 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       const height = Math.max(1, host.clientHeight);
       hostWidth = width;
       hostHeight = height;
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, width < 768 ? 1.5 : 2);
+      // Retain photograph detail on Retina phones in both orientations.
+      // Bound the drawing buffer for larger touch viewports without changing
+      // resolution during a swipe or approach animation.
+      const mobileViewport = width < 768 || (height < 768 && window.matchMedia('(pointer: coarse)').matches);
+      const resolutionLimit = mobileViewport ? Math.min(3, Math.sqrt(4_000_000 / (width * height))) : 2;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, resolutionLimit);
       if (renderer.getPixelRatio() !== pixelRatio) renderer.setPixelRatio(pixelRatio);
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
