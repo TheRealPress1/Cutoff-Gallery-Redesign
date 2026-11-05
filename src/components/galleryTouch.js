@@ -1,6 +1,7 @@
 // A touch contact selects on tap or advances one work on horizontal release.
-// It never changes the camera while moving. Mouse/pen input stays independent.
-export function bindGalleryTouch(host, { onStart, onTap, onNavigate }) {
+// Detail mode instead pans the photograph; that choice lasts for the contact.
+// Mouse/pen input stays independent.
+export function bindGalleryTouch(host, { onStart, onTap, onNavigate, isPanning, onPan }) {
   const ownerDocument = host.ownerDocument;
   const ownerWindow = ownerDocument.defaultView;
   const contacts = new Set();
@@ -40,6 +41,7 @@ export function bindGalleryTouch(host, { onStart, onTap, onNavigate }) {
       dy: 0,
       movement: 0,
       axis: null,
+      panning: !!isPanning?.(),
       data: onStart?.(event),
     };
     // Touch already has implicit pointer capture on the original target.
@@ -47,6 +49,8 @@ export function bindGalleryTouch(host, { onStart, onTap, onNavigate }) {
   }
 
   function update(event) {
+    const previousX = gesture.dx;
+    const previousY = gesture.dy;
     gesture.dx = event.clientX - gesture.startX;
     gesture.dy = event.clientY - gesture.startY;
     const x = Math.abs(gesture.dx);
@@ -55,6 +59,11 @@ export function bindGalleryTouch(host, { onStart, onTap, onNavigate }) {
     if (!gesture.axis && Math.max(x, y) >= 10) {
       if (x >= y * 1.3) gesture.axis = 'x';
       else if (y >= x * 1.3) gesture.axis = 'y';
+    }
+    if (gesture.panning) {
+      const dx = gesture.dx - previousX;
+      const dy = gesture.dy - previousY;
+      if (dx || dy) onPan?.(dx, dy);
     }
   }
 
@@ -71,7 +80,7 @@ export function bindGalleryTouch(host, { onStart, onTap, onNavigate }) {
       gesture = null;
       // Wait for release so a second finger or native scrolling can cancel
       // the entire gesture before any selection or navigation is committed.
-      if (completed.axis === 'x' && Math.abs(completed.dx) >= 40 && Math.abs(completed.dx) >= Math.abs(completed.dy) * 1.3) {
+      if (!completed.panning && completed.axis === 'x' && Math.abs(completed.dx) >= 40 && Math.abs(completed.dx) >= Math.abs(completed.dy) * 1.3) {
         suppressClick();
         onNavigate?.(completed.dx < 0 ? 1 : -1);
       } else if (completed.movement < 8) {

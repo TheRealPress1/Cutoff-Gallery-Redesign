@@ -122,6 +122,17 @@
 .museum-mode[data-theme="light"] .inspection-mobile-controls button:hover {
   background: #ded3c1;
 }
+.museum-mode[data-theme="light"] .inspection-detail-controls {
+  color: #493b2a;
+}
+.museum-mode[data-theme="light"] .inspection-detail-controls button,
+.museum-mode[data-theme="light"] .inspection-detail-controls > span {
+  background: #eee7daf2;
+  border-color: #9f8d7166;
+}
+.museum-mode[data-theme="light"] .inspection-detail-controls button:hover {
+  background: #ded3c1;
+}
 .museum-mode[data-theme="light"] .inspection-back:hover,
 .museum-mode[data-theme="light"] .inspection-inquire:hover,
 .museum-mode[data-theme="light"] .inspection-panel .photographer-credit.has-profile:hover .photographer-credit-link {

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
 import PhotographerCredit from "./PhotographerCredit.jsx";
 import { useLanguage } from "../i18n.jsx";
 import "./gallery-inspection.css";
@@ -7,6 +7,9 @@ import "./gallery-inspection.css";
 export default function GalleryInspection({
   artwork,
   approaching,
+  detailZoom,
+  detailAvailable,
+  onToggleDetailZoom,
   onBack,
   onExplore,
   onInquire,
@@ -27,11 +30,20 @@ export default function GalleryInspection({
 
   return (
     <div
-      className={`gallery-inspection ${approaching ? "is-arriving" : "has-arrived"}`}
+      className={`gallery-inspection ${approaching ? "is-arriving" : "has-arrived"} ${detailZoom ? "is-detail-zoom" : ""}`}
     >
       <button className="inspection-back" onClick={onBack} aria-label={t("Retour à la galerie", "Back to the room")}>
         <ArrowLeft size={16} aria-hidden="true" /> <span>{t("Retour à la galerie", "Back to the room")}</span>
       </button>
+      {detailAvailable && <div className="inspection-detail-controls" aria-hidden={approaching} inert={approaching}>
+        <button onClick={onToggleDetailZoom} aria-pressed={detailZoom}>
+          {detailZoom ? <ZoomOut size={16} aria-hidden="true" /> : <ZoomIn size={16} aria-hidden="true" />}
+          {detailZoom ? t("Vue entière", "Full view") : t("Examiner les détails", "Examine the details")}
+        </button>
+        <span aria-live="polite">
+          {detailZoom ? t("Faites glisser pour explorer", "Drag to explore") : t("Ou cliquez sur un détail de la photo", "Or click a detail in the photograph")}
+        </span>
+      </div>}
       <aside
         ref={panel}
         className="inspection-panel"

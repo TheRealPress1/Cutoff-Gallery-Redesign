@@ -216,6 +216,8 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [focused, setFocused] = useState(false);
   const [inspecting, setInspecting] = useState(false);
+  const [detailZoom, setDetailZoom] = useState(false);
+  const [detailAvailable, setDetailAvailable] = useState(true);
   const [immersive, setImmersive] = useState(false);
   const [approaching, setApproaching] = useState(false);
   const approachTimer = useRef(null);
@@ -243,6 +245,7 @@ export default function App() {
     clearTimeout(approachTimer.current);
     approachTimer.current = null;
     setApproaching(false);
+    setDetailZoom(false);
   }, []);
   useEffect(() => () => clearTimeout(approachTimer.current), []);
   const closeModal = useCallback(() => {
@@ -405,13 +408,19 @@ export default function App() {
       if (view === "gallery" && e.key === "ArrowUp") {
         e.preventDefault();
         if (!inspecting && !e.repeat) openWork(viewedIndex);
+        else if (inspecting && detailAvailable && !approaching && !e.repeat) setDetailZoom(true);
       }
       if (view === "gallery" && e.key === "ArrowDown") {
         e.preventDefault();
-        if (inspecting || focused) leaveInspection();
+        if (!e.repeat) {
+          if (detailZoom) setDetailZoom(false);
+          else if (inspecting || focused) leaveInspection();
+        }
       }
       if (e.key === "Escape") {
-        if (inspecting) leaveInspection();
+        if (e.repeat) return;
+        if (detailZoom) setDetailZoom(false);
+        else if (inspecting) leaveInspection();
         else {
           cancelApproach();
           setImmersive(false);
@@ -427,6 +436,9 @@ export default function App() {
     navigate,
     cancelApproach,
     inspecting,
+    detailZoom,
+    detailAvailable,
+    approaching,
     focused,
     view,
     viewedIndex,
@@ -517,10 +529,17 @@ export default function App() {
                 onViewChange={setViewedIndex}
                 onSelect={openWork}
                 onNavigate={navigate}
-                onBackgroundClick={leaveInspection}
-                onReady={() => setReady(true)}
+                onBackgroundClick={() => detailZoom ? setDetailZoom(false) : leaveInspection()}
+                onReady={(supportsDetail = true) => {
+                  setReady(true);
+                  setDetailAvailable(supportsDetail);
+                  if (!supportsDetail) setDetailZoom(false);
+                }}
                 focused={focused}
                 inspecting={inspecting}
+                approaching={approaching}
+                detailZoom={detailZoom}
+                onDetailZoomChange={setDetailZoom}
                 reducedMotion={reducedMotion}
                 theme={museumTheme}
               />
@@ -528,6 +547,9 @@ export default function App() {
                 <GalleryInspection
                   artwork={selected}
                   approaching={approaching}
+                  detailZoom={detailZoom}
+                  detailAvailable={detailAvailable}
+                  onToggleDetailZoom={() => setDetailZoom((zoomed) => !zoomed)}
                   onBack={leaveInspection}
                   onExplore={() => setModal("artwork")}
                   onInquire={inquire}

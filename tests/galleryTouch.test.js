@@ -23,7 +23,7 @@ class Surface {
   hasPointerCapture() { return false; }
 }
 
-function setup(t, { fallback = false } = {}) {
+function setup(t, { fallback = false, isPanning } = {}) {
   const window = new Surface();
   const document = new Surface(window);
   document.defaultView = window;
@@ -35,9 +35,11 @@ function setup(t, { fallback = false } = {}) {
   host.clientWidth = 390;
   const actions = [];
   const starts = [];
+  const pans = [];
   const binding = bindGalleryTouch(host, {
     onStart(event) { starts.push(event); return 'artwork-at-start'; },
     onNavigate(direction) { actions.push(['navigate', direction]); },
+    ...(isPanning && { isPanning, onPan(dx, dy) { pans.push([dx, dy]); } }),
     ...(!fallback && { onTap(event, metadata) { actions.push(['tap', metadata]); } }),
   });
   t.after(binding.cleanup);
@@ -70,8 +72,78 @@ function setup(t, { fallback = false } = {}) {
     emit('pointermove', { ...values, clientX: endX });
     emit('pointerup', { ...values, clientX: endX });
   }
-  return { host, image, panel, document, window, actions, starts, emit, swipe, ...binding };
+  return { host, image, panel, document, window, actions, starts, pans, emit, swipe, ...binding };
 }
+
+test('detail drags pan both axes by incremental deltas without changing photographs', t => {
+  const h = setup(t, { isPanning: () => true });
+  h.emit('pointerdown');
+  h.emit('pointermove', { clientX: 150, clientY: 210 });
+  h.emit('pointermove', { clientX: 120, clientY: 160 });
+  h.emit('pointerup', { clientX: 120, clientY: 160 });
+  assert.deepEqual(h.pans, [[-70, 10], [-30, -50]]);
+  assert.deepEqual(h.actions, []);
+});
+
+test('detail release includes any final movement once and preserves taps', t => {
+  const h = setup(t, { isPanning: () => true });
+  h.emit('pointerdown');
+  h.emit('pointermove', { clientX: 120 });
+  h.emit('pointerup', { clientX: 100 });
+  h.emit('pointerup', { clientX: 100 });
+  assert.deepEqual(h.pans, [[-100, 0], [-20, 0]]);
+  assert.deepEqual(h.actions, []);
+  h.emit('pointerdown');
+  h.emit('pointermove', { clientX: 222, clientY: 201 });
+  h.emit('pointerup', { clientX: 222, clientY: 201 });
+  assert.deepEqual(h.actions, [['tap', 'artwork-at-start']]);
+});
+
+test('pan versus navigation mode is fixed at the start of each contact', t => {
+  let panning = true;
+  const h = setup(t, { isPanning: () => panning });
+  h.emit('pointerdown');
+  panning = false;
+  h.emit('pointermove', { clientX: 100 });
+  h.emit('pointerup', { clientX: 100 });
+  assert.deepEqual(h.pans, [[-120, 0]]);
+  assert.deepEqual(h.actions, []);
+  h.emit('pointerdown');
+  panning = true;
+  h.emit('pointermove', { clientX: 100 });
+  h.emit('pointerup', { clientX: 100 });
+  assert.deepEqual(h.pans, [[-120, 0]]);
+  assert.deepEqual(h.actions, [['navigate', 1]]);
+});
+
+test('a second finger cancels detail panning until all contacts end', t => {
+  const h = setup(t, { isPanning: () => true });
+  h.emit('pointerdown');
+  h.emit('pointermove', { clientX: 180 });
+  h.emit('pointerdown', { target: h.panel, pointerId: 2, isPrimary: false });
+  h.emit('pointerup', { target: h.panel, pointerId: 2, isPrimary: false });
+  h.emit('pointermove', { clientX: 100 });
+  h.emit('pointerup', { clientX: 50 });
+  assert.deepEqual(h.pans, [[-40, 0]]);
+  assert.deepEqual(h.actions, []);
+  h.swipe(320);
+  assert.deepEqual(h.pans, [[-40, 0], [100, 0]]);
+  assert.deepEqual(h.actions, []);
+});
+
+test('pinch takeover and native cancellation stop detail panning without a release jump', t => {
+  for (const type of ['pinch', 'pointercancel', 'lostpointercapture']) {
+    const h = setup(t, { isPanning: () => true });
+    h.emit('pointerdown');
+    h.emit('pointermove', { clientX: 180 });
+    if (type === 'pinch') h.cancel();
+    else h.emit(type);
+    h.emit('pointermove', { clientX: 100 });
+    h.emit('pointerup', { clientX: 50 });
+    assert.deepEqual(h.pans, [[-40, 0]]);
+    assert.deepEqual(h.actions, []);
+  }
+});
 
 test('left swipe advances only on release and only one photograph', t => {
   const h = setup(t);

@@ -4,6 +4,7 @@ import { bindGalleryPinch } from './galleryPinch.js';
 import { bindGalleryTouch } from './galleryTouch.js';
 import { createGalleryThemeTransition } from './galleryTheme.js';
 import { createGalleryWoodTextures } from './galleryWood.js';
+import { DETAIL_SCALE, PHOTO_DEPTH, detailPanAtPoint, constrainDetailPan, panDetailByPixels } from './galleryDetail.js';
 import { useLanguage } from '../i18n.jsx';
 import { localizeArtwork } from '../data/translations.js';
 
@@ -55,14 +56,14 @@ function labelTexture(artwork, light = false) {
   return texture;
 }
 
-export default function GalleryScene({ artworks = [], activeIndex = 0, navigationId = 0, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused = false, inspecting = false, reducedMotion = false, theme = 'dark' }) {
+export default function GalleryScene({ artworks = [], activeIndex = 0, navigationId = 0, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused = false, inspecting = false, approaching = false, detailZoom = false, onDetailZoomChange, reducedMotion = false, theme = 'dark' }) {
   const { language, t } = useLanguage();
   const hostRef = useRef(null);
   const controlsRef = useRef(null);
   const invalidateRef = useRef(() => {});
   const [failed, setFailed] = useState(false);
   const [compactFallback, setCompactFallback] = useState(false);
-  controlsRef.current = { language, t, activeIndex, navigationId, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused, inspecting, reducedMotion, theme };
+  controlsRef.current = { language, t, activeIndex, navigationId, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused, inspecting, approaching, detailZoom, onDetailZoomChange, reducedMotion, theme };
 
   useEffect(() => {
     const host = hostRef.current;
@@ -82,7 +83,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     } catch {
       setFailed(true);
-      controlsRef.current.onReady?.();
+      controlsRef.current.onReady?.(false);
       return undefined;
     }
 
@@ -120,6 +121,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     const pointer = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
     const selectable = [];
+    const photographs = [];
     const textures = new Set();
     const pendingTextures = [];
     const galleryLights = [];
@@ -224,7 +226,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       const edge = 0.047;
       const outerWidth = imageWidth + 2 * (mat + edge);
       const outerHeight = imageHeight + 2 * (mat + edge);
-      dimensions.push({ outerWidth, outerHeight });
+      dimensions.push({ outerWidth, outerHeight, imageWidth, imageHeight });
       const backing = box(bay, outerWidth, outerHeight, 0.13, frameMaterial, 0, ART_HEIGHT, 0.09, true);
       backing.userData.artworkIndex = i;
       selectable.push(backing);
@@ -233,8 +235,10 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       const photograph = new THREE.Mesh(new THREE.PlaneGeometry(imageWidth, imageHeight), imageMaterial);
       photograph.position.set(0, ART_HEIGHT, 0.173);
       photograph.userData.artworkIndex = i;
+      photograph.userData.isPhotograph = true;
       bay.add(photograph);
       selectable.push(photograph);
+      photographs.push(photograph);
       pendingTextures.push(new Promise((resolve) => {
         loader.load(artwork.image, (texture) => {
           if (disposed) { texture.dispose(); resolve(); return; }
@@ -311,6 +315,8 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     let lookDragStarted = false;
     let dragY = 0;
     let targetDragY = 0;
+    let detailPan = { x: 0, y: 0 };
+    const detailViews = artworks.map(() => ({ crop: 1, pan: { x: 0, y: 0 } }));
     const lookAt = new THREE.Vector3();
 
     function resize() {
@@ -355,6 +361,34 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       }
       return nearest;
     }
+    function zoomIntoPhotograph(hit) {
+      const current = controlsRef.current;
+      if (!current.inspecting || current.approaching || current.detailZoom || !hit?.object.userData.isPhotograph || hit.object.userData.artworkIndex !== current.activeIndex) return;
+      const size = dimensions[current.activeIndex];
+      const detail = detailViews[current.activeIndex];
+      detailPan = detailPanAtPoint(hit.uv, size.imageWidth, size.imageHeight, detail.crop, detail.pan);
+      current.onDetailZoomChange?.(true);
+      renderer.domElement.style.cursor = 'grab';
+    }
+    function panPhotograph(dx, dy) {
+      const current = controlsRef.current;
+      if (!current.detailZoom || !current.inspecting) return;
+      const detail = detailViews[current.activeIndex];
+      const size = dimensions[current.activeIndex];
+      const next = panDetailByPixels(detail.pan, dx, dy, viewDistance - PHOTO_DEPTH, Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), hostHeight, detail.crop);
+      detailPan = constrainDetailPan(next, size, size.imageWidth * detail.crop, size.imageHeight * detail.crop);
+      // Take over from the visible crop, even halfway through a zoom animation.
+      detail.pan = { ...detailPan };
+      invalidate();
+    }
+    function activateAt(event, startedOnArtwork) {
+      const current = controlsRef.current;
+      const hit = hitsAt(event)[0];
+      if (current.inspecting) {
+        if (!current.detailZoom) zoomIntoPhotograph(hit);
+        if (!hit && !startedOnArtwork && document.elementFromPoint(event.clientX, event.clientY) === renderer.domElement) current.onBackgroundClick?.();
+      } else if (hit) current.onSelect?.(hit.object.userData.artworkIndex);
+    }
     function pointerDown(event) {
       if (event.pointerType === 'touch' || event.button !== 0 || !event.isPrimary || dragging) return;
       dragging = true;
@@ -375,7 +409,11 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         dragDistance += Math.abs(dx) + Math.abs(dy);
         lastPointerX = event.clientX;
         lastPointerY = event.clientY;
-        if (!controlsRef.current.inspecting) {
+        if (controlsRef.current.detailZoom && controlsRef.current.inspecting) {
+          if (dragDistance < 8) return;
+          panPhotograph(dx, dy);
+          renderer.domElement.style.cursor = 'grabbing';
+        } else if (!controlsRef.current.inspecting) {
           if (dragDistance < 8) return;
           if (!lookDragStarted) {
             lookDragStarted = true;
@@ -393,9 +431,10 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
           invalidate();
         }
       } else if (event.pointerType !== 'touch') {
-        const overArtwork = hitsAt(event).length > 0;
+        const hit = hitsAt(event)[0];
+        const overArtwork = Boolean(hit);
         renderer.domElement.style.cursor = controlsRef.current.inspecting
-          ? overArtwork ? 'default' : 'zoom-out'
+          ? controlsRef.current.detailZoom ? 'grab' : hit?.object.userData.isPhotograph ? 'zoom-in' : overArtwork ? 'default' : 'zoom-out'
           : overArtwork ? 'pointer' : 'grab';
       }
     }
@@ -405,12 +444,9 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       dragging = false;
       activePointer = null;
       const current = controlsRef.current;
-      renderer.domElement.style.cursor = current.inspecting ? 'default' : 'grab';
+      renderer.domElement.style.cursor = current.detailZoom ? 'grab' : current.inspecting ? 'zoom-in' : 'grab';
       if (dragDistance < 8) {
-        const hit = hitsAt(event)[0];
-        if (current.inspecting) {
-          if (!hit && !pointerStartedOnArtwork && document.elementFromPoint(event.clientX, event.clientY) === renderer.domElement) current.onBackgroundClick?.();
-        } else if (hit) current.onSelect?.(hit.object.userData.artworkIndex);
+        activateAt(event, pointerStartedOnArtwork);
       }
     }
     function pointerCancel(event) {
@@ -426,13 +462,9 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     renderer.domElement.addEventListener('lostpointercapture', pointerCancel);
     const touch = bindGalleryTouch(host, {
       onStart: (event) => controlsRef.current.inspecting && hitsAt(event).length > 0,
-      onTap: (event, startedOnArtwork) => {
-        const current = controlsRef.current;
-        const hit = hitsAt(event)[0];
-        if (current.inspecting) {
-          if (!hit && !startedOnArtwork && document.elementFromPoint(event.clientX, event.clientY) === renderer.domElement) current.onBackgroundClick?.();
-        } else if (hit) current.onSelect?.(hit.object.userData.artworkIndex);
-      },
+      onTap: activateAt,
+      isPanning: () => controlsRef.current.detailZoom && controlsRef.current.inspecting,
+      onPan: panPhotograph,
       onNavigate: (direction) => controlsRef.current.onNavigate?.(direction),
     });
     const unbindPinch = bindGalleryPinch(host.parentElement, {
@@ -448,9 +480,9 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       },
       onZoomIn: (event) => {
         const current = controlsRef.current;
-        if (current.inspecting) return;
         const hit = Number.isFinite(event.clientX) && Number.isFinite(event.clientY) ? hitsAt(event)[0] : null;
-        current.onSelect?.(hit?.object.userData.artworkIndex ?? facingArtworkIndex());
+        if (current.inspecting) zoomIntoPhotograph(hit);
+        else current.onSelect?.(hit?.object.userData.artworkIndex ?? facingArtworkIndex());
       },
       onZoomOut: () => {
         const current = controlsRef.current;
@@ -459,7 +491,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       onNavigate: (direction) => controlsRef.current.onNavigate?.(direction),
     });
     Promise.allSettled(pendingTextures).then(() => {
-      if (!disposed && !ready) { ready = true; controlsRef.current.onReady?.(); }
+      if (!disposed && !ready) { ready = true; controlsRef.current.onReady?.(true); }
     });
 
     function animate(time) {
@@ -515,6 +547,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         lastFocused = current.focused;
         lastInspecting = current.inspecting;
         lastIndex = index;
+        detailPan = { x: 0, y: 0 };
       }
       const selectedSize = dimensions[index];
       const fitDistance = selectedSize.outerWidth / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect * 0.9);
@@ -534,6 +567,9 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         selectedSize.outerWidth / (2 * lensScale * camera.aspect * inspectionWidth),
         selectedSize.outerHeight / (2 * lensScale * inspectionHeight),
       );
+      const zoomed = current.inspecting && current.detailZoom;
+      detailPan = zoomed ? constrainDetailPan(detailPan, selectedSize, selectedSize.imageWidth / DETAIL_SCALE, selectedSize.imageHeight / DETAIL_SCALE) : { x: 0, y: 0 };
+      renderer.domElement.style.touchAction = zoomed ? 'none' : 'pan-y';
       const targetDistance = current.inspecting
         ? inspectionDistance
         : current.focused ? Math.max(5.15, fitDistance, heightDistance) : Math.max(comfortableDistance, fitDistance, heightDistance);
@@ -588,12 +624,37 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
           ? current.t('se trouve au-dessus des informations sur l’œuvre', 'is above the artwork information')
           : current.t('se trouve à gauche des informations sur l’œuvre', 'is on the left beside the artwork information')
         : current.t('se trouve devant vous', 'is ahead');
+      const interaction = zoomed
+        ? current.t('Photographie agrandie dans son cadre. Faites glisser pour examiner les détails. Vue entière, flèche bas ou Échap pour dézoomer.', 'Photograph enlarged inside its frame. Drag to examine details. Use Full view, Down arrow, or Escape to zoom out.')
+        : current.inspecting
+          ? current.t('Cliquez sur un détail de la photographie pour l’agrandir. Sur écran tactile, balayez pour changer de photographie.', 'Click a detail in the photograph to magnify it. On a touchscreen, swipe to change photographs.')
+          : current.t('Sur écran tactile, balayez pour changer de photographie. Avec la souris, faites glisser pour tourner à 360 degrés.', 'On a touchscreen, swipe to change photographs. With a mouse, drag to turn 360 degrees.');
       renderer.domElement.setAttribute('aria-label', current.t(
-        `${current.theme === 'light' ? 'Galerie immersive aux murs crème' : 'Galerie immersive à l’éclairage tamisé'}. ${viewed.artist}, ${viewed.year}, ${placement}. Sur écran tactile, balayez vers la gauche ou la droite pour changer de photographie. Avec la souris, faites glisser pour tourner à 360 degrés. Les commandes de navigation sont également disponibles.`,
-        `${current.theme === 'light' ? 'Cream-walled museum gallery' : 'Dark museum gallery'}. ${viewed.artist}, ${viewed.year}, ${placement}. On a touchscreen, swipe left or right to change photographs. With a mouse, drag to turn 360 degrees. Photograph navigation controls are also available.`,
+        `${current.theme === 'light' ? 'Galerie immersive aux murs crème' : 'Galerie immersive à l’éclairage tamisé'}. ${viewed.artist}, ${viewed.year}, ${placement}. ${interaction}`,
+        `${current.theme === 'light' ? 'Cream-walled museum gallery' : 'Dark museum gallery'}. ${viewed.artist}, ${viewed.year}, ${placement}. ${interaction}`,
       ));
+      // The frame, mat, wall, and camera stay in place. Only the source area
+      // sampled by the photograph changes, so magnification cannot spill out.
+      let detailAnimating = false;
+      const detailEase = current.reducedMotion || document.hidden ? 1 : 1 - Math.exp(-delta * 9);
+      detailViews.forEach((detail, i) => {
+        const targetCrop = zoomed && i === index ? 1 / DETAIL_SCALE : 1;
+        const targetPan = zoomed && i === index ? detailPan : { x: 0, y: 0 };
+        detail.crop += (targetCrop - detail.crop) * detailEase;
+        detail.pan.x += (targetPan.x - detail.pan.x) * detailEase;
+        detail.pan.y += (targetPan.y - detail.pan.y) * detailEase;
+        const moving = Math.abs(targetCrop - detail.crop) > 0.00001 || Math.abs(targetPan.x - detail.pan.x) > 0.00001 || Math.abs(targetPan.y - detail.pan.y) > 0.00001;
+        if (!moving) { detail.crop = targetCrop; detail.pan = { ...targetPan }; }
+        detailAnimating ||= moving;
+        const map = photographs[i].material.map;
+        if (map) {
+          const size = dimensions[i];
+          map.repeat.set(detail.crop, detail.crop);
+          map.offset.set((1 - detail.crop) / 2 + detail.pan.x / size.imageWidth, (1 - detail.crop) / 2 + detail.pan.y / size.imageHeight);
+        }
+      });
       renderer.render(scene, camera);
-      if (roomTheme.active || Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
+      if (roomTheme.active || detailAnimating || Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
     }
     function visibilityChange() {
       if (document.hidden && frame !== null) { cancelAnimationFrame(frame); frame = null; }
@@ -660,13 +721,13 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     return () => { unbindPinch(); touch.cleanup(); };
   }, [failed]);
 
-  useEffect(() => { invalidateRef.current(true); }, [activeIndex, navigationId, focused, inspecting, reducedMotion, language, theme]);
+  useEffect(() => { invalidateRef.current(true); }, [activeIndex, navigationId, focused, inspecting, approaching, detailZoom, reducedMotion, language, theme]);
   const baseSelected = artworks[clamp(activeIndex, 0, Math.max(artworks.length - 1, 0))];
   const selected = baseSelected ? localizeArtwork(baseSelected, language) : undefined;
   const fallbackBounds = inspecting
     ? compactFallback ? { left: '5%', top: '5.5%', width: '90%', height: '37%' } : { left: '7%', top: '13.5%', width: '50%', height: '73%' }
     : { left: '5%', top: '12.5%', width: '90%', height: '75%' };
-  return <div ref={hostRef} className="gallery-scene" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}>
+  return <div ref={hostRef} className="gallery-scene" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: detailZoom ? 'none' : 'pan-y' }}>
     {failed && selected && <div onClick={(event) => { if (inspecting && event.target === event.currentTarget) onBackgroundClick?.(); }} style={{ position: 'absolute', inset: 0, background: theme === 'light' ? '#e4dfd4' : '#171817', transition: reducedMotion ? 'none' : 'background-color 650ms ease', cursor: inspecting ? 'zoom-out' : 'default' }}>
       <button type="button" onClick={(event) => { if (!inspecting) onSelect?.(activeIndex); else if (event.detail > 0 && event.target === event.currentTarget) onBackgroundClick?.(); }} aria-label={t(`Voir ${selected.title}`, `View ${selected.title}`)} style={{ position: 'absolute', ...fallbackBounds, display: 'grid', placeItems: 'center', border: 0, padding: 0, background: 'transparent', cursor: inspecting ? 'default' : 'pointer', transition: reducedMotion ? 'none' : 'left 700ms ease, top 700ms ease, width 700ms ease, height 700ms ease' }}>
         <img src={selected.image} alt={selected.title} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', boxSizing: 'border-box', objectFit: 'contain', display: 'block', border: '6px solid #080909', padding: 20, background: '#e7e4dc', boxShadow: '0 0 70px #fff1c51f' }} />
