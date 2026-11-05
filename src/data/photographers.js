@@ -4,7 +4,7 @@ export const photographers = {
   "david-dahan": {
     id: "david-dahan",
     name: "David Dahan",
-    portrait: "/photographers/david-dahan.jpg",
+    portrait: "/photographers/david-dahan-portrait.jpg",
     portraitAlt: "David Dahan seated, wearing a white shirt and grey waistcoat",
     avatarScale: 1.6,
     avatarPosition: "50% 0%",
