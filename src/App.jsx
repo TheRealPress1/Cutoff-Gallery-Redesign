@@ -386,7 +386,11 @@ export default function App() {
   }, []);
   useEffect(() => {
     const handler = (e) => {
-      if (modal || photographer || ["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      if (
+        e.defaultPrevented || modal || photographer ||
+        e.altKey || e.ctrlKey || e.metaKey || e.shiftKey ||
+        e.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)
+      ) return;
       if (e.key === "ArrowRight") {
         e.preventDefault();
         navigate(1);
@@ -394,6 +398,14 @@ export default function App() {
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         navigate(-1);
+      }
+      if (view === "gallery" && e.key === "ArrowUp") {
+        e.preventDefault();
+        if (!inspecting && !e.repeat) openWork(viewedIndex);
+      }
+      if (view === "gallery" && e.key === "ArrowDown") {
+        e.preventDefault();
+        if (inspecting || focused) leaveInspection();
       }
       if (e.key === "Escape") {
         if (inspecting) leaveInspection();
@@ -412,6 +424,10 @@ export default function App() {
     navigate,
     cancelApproach,
     inspecting,
+    focused,
+    view,
+    viewedIndex,
+    openWork,
     leaveInspection,
   ]);
   useEffect(() => {
