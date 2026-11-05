@@ -1,20 +1,15 @@
-/* Room controls remain reachable when the header is tucked away. */
+/* Appearance settings share the main header with the gallery navigation. */
 .museum-mode .gallery-appearance {
   --appearance-bg: #1b1f20c9;
   --appearance-border: #747d7066;
   --appearance-ink: #eeece4;
   --appearance-hover: #343b36;
   --appearance-focus: #c7aa7c;
-  position: absolute;
-  top: var(--gallery-control-top);
-  right: var(--gallery-control-right);
-  z-index: 6;
+  margin-left: auto;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 8px;
-}
-.museum-mode .gallery-topbar {
-  right: calc(var(--gallery-control-right) + 116px);
 }
 .museum-mode .exhibition-title h1 {
   line-height: 1.15;
@@ -175,15 +170,8 @@
   color: #1b2612;
 }
 @media (max-width: 760px) {
-  .museum-mode .gallery-topbar {
-    right: calc(var(--gallery-control-right) + 108px);
-  }
   .museum-mode .gallery-appearance {
     gap: 6px;
-  }
-  .museum-mode.inspecting-artwork .gallery-appearance {
-    top: 0;
-    right: 12px;
   }
   .museum-mode .gallery-inspection::before {
     background: linear-gradient(180deg, transparent 43%, #111611a8 49%, #111611f5 64%);
@@ -193,6 +181,12 @@
   }
   .museum-mode[data-theme="light"] .inspection-location-row {
     background: #f5f5f1fa;
+  }
+}
+@media (max-width: 600px) {
+  .site-shell .site-header > .gallery-appearance {
+    grid-column: 2;
+    grid-row: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

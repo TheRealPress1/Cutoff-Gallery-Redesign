@@ -489,7 +489,12 @@ export default function App() {
             About
           </button>
         </nav>
-        {view !== "gallery" && <LanguageToggle />}
+        {view === "gallery" ? (
+          <div className="gallery-appearance" role="group" aria-label={t("Ambiance et langue", "Gallery appearance and language")}>
+            <ThemeToggle theme={museumTheme} onToggle={() => setMuseumTheme((current) => current === "dark" ? "light" : "dark")} />
+            <LanguageToggle />
+          </div>
+        ) : <LanguageToggle />}
       </header>
       <main>
         {view === "collection" && (
@@ -543,10 +548,6 @@ export default function App() {
                     {t("Le son", "Sound")}<span>.</span> {t("L’instant", "Still")}<span>.</span>
                   </h1>
                 </div>
-              </div>
-              <div className="gallery-appearance" role="group" aria-label={t("Ambiance et langue", "Gallery appearance and language")}>
-                <ThemeToggle theme={museumTheme} onToggle={() => setMuseumTheme((current) => current === "dark" ? "light" : "dark")} />
-                <LanguageToggle />
               </div>
               {!ready && (
                 <div className="gallery-loading">
