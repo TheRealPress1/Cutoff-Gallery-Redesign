@@ -39,12 +39,12 @@ function labelTexture(artwork, light = false) {
   canvas.width = 512;
   canvas.height = 220;
   const context = canvas.getContext('2d');
-  context.fillStyle = light ? '#e8e9e4' : '#363632';
+  context.fillStyle = light ? '#e4dfd4' : '#363632';
   context.fillRect(0, 0, 512, 220);
-  context.fillStyle = light ? '#252923' : '#dbd8d1';
+  context.fillStyle = light ? '#302b25' : '#dbd8d1';
   context.font = '25px Arial, sans-serif';
   context.fillText(artwork.artist, 22, 53, 465);
-  context.fillStyle = light ? '#5a6156' : '#a4a199';
+  context.fillStyle = light ? '#6c6257' : '#a4a199';
   context.font = '23px Arial, sans-serif';
   context.fillText(`${artwork.year} · ${artwork.location}`, 22, 98, 465);
   context.font = '22px Arial, sans-serif';
@@ -141,14 +141,15 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     const themeTransition = createGalleryThemeTransition(controlsRef.current.theme);
     let renderedThemeAmount = -1;
     const darkBackground = new THREE.Color('#101111');
-    const lightBackground = new THREE.Color('#f4f4f1');
-    // Surface emission gives the room a white exhibition finish without
-    // changing the lighting, exposure, frames, mats, or photograph materials.
+    const lightBackground = new THREE.Color('#e4dfd4');
+    // A small amount of warm room emission keeps the cream finish luminous
+    // while letting the existing spotlights and shadows model each surface.
+    // Photograph lighting, exposure, frames, and mats remain unchanged.
     const themedSurfaces = [
-      { material: wallMaterial, color: '#f7f7f4', emissive: '#ffffff', intensity: 1.6 },
-      { material: floorMaterial, color: '#d8dad5', emissive: '#d3d6cf', intensity: 0.8 },
-      { material: ceilingMaterial, color: '#e8e9e7', emissive: '#ffffff', intensity: 1.1 },
-      { material: trimMaterial, color: '#d3d6cf', emissive: '#d3d6cf', intensity: 0.9 },
+      { material: wallMaterial, color: '#eee7d9', emissive: '#e9dec8', intensity: 0.4 },
+      { material: floorMaterial, color: '#bdb09b', emissive: '#b7a68d', intensity: 0.16 },
+      { material: ceilingMaterial, color: '#d8cebc', emissive: '#d4c7b1', intensity: 0.3 },
+      { material: trimMaterial, color: '#c9bda8', emissive: '#c5b89f', intensity: 0.3 },
     ].map(({ material, color, emissive, intensity }) => ({
       material,
       darkColor: material.color.clone(),
@@ -177,7 +178,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     scene.add(ceiling);
     const seamMaterial = new THREE.LineBasicMaterial({ color: '#171917', transparent: true, opacity: 0.7 });
     const darkSeam = seamMaterial.color.clone();
-    const lightSeam = new THREE.Color('#afb4a9');
+    const lightSeam = new THREE.Color('#8b7f6f');
     for (let i = 0; i < count; i += 1) {
       const angle = TAU * i / count;
       const points = [new THREE.Vector3(0, 0.004, 0), new THREE.Vector3(Math.sin(angle) * ROOM_RADIUS, 0.004, -Math.cos(angle) * ROOM_RADIUS)];
@@ -572,8 +573,8 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
           : current.t('se trouve à gauche des informations sur l’œuvre', 'is on the left beside the artwork information')
         : current.t('se trouve devant vous', 'is ahead');
       renderer.domElement.setAttribute('aria-label', current.t(
-        `${current.theme === 'light' ? 'Galerie immersive aux murs blancs' : 'Galerie immersive à l’éclairage tamisé'}. ${viewed.artist}, ${viewed.year}, ${placement}. Sur écran tactile, balayez vers la gauche ou la droite pour changer de photographie. Avec la souris, faites glisser pour tourner à 360 degrés. Les commandes de navigation sont également disponibles.`,
-        `${current.theme === 'light' ? 'White-walled museum gallery' : 'Dark museum gallery'}. ${viewed.artist}, ${viewed.year}, ${placement}. On a touchscreen, swipe left or right to change photographs. With a mouse, drag to turn 360 degrees. Photograph navigation controls are also available.`,
+        `${current.theme === 'light' ? 'Galerie immersive aux murs crème' : 'Galerie immersive à l’éclairage tamisé'}. ${viewed.artist}, ${viewed.year}, ${placement}. Sur écran tactile, balayez vers la gauche ou la droite pour changer de photographie. Avec la souris, faites glisser pour tourner à 360 degrés. Les commandes de navigation sont également disponibles.`,
+        `${current.theme === 'light' ? 'Cream-walled museum gallery' : 'Dark museum gallery'}. ${viewed.artist}, ${viewed.year}, ${placement}. On a touchscreen, swipe left or right to change photographs. With a mouse, drag to turn 360 degrees. Photograph navigation controls are also available.`,
       ));
       renderer.render(scene, camera);
       if (roomTheme.active || Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
@@ -650,7 +651,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     ? compactFallback ? { left: '5%', top: '5.5%', width: '90%', height: '37%' } : { left: '7%', top: '13.5%', width: '50%', height: '73%' }
     : { left: '5%', top: '12.5%', width: '90%', height: '75%' };
   return <div ref={hostRef} className="gallery-scene" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}>
-    {failed && selected && <div onClick={(event) => { if (inspecting && event.target === event.currentTarget) onBackgroundClick?.(); }} style={{ position: 'absolute', inset: 0, background: theme === 'light' ? '#f4f4f1' : '#171817', transition: reducedMotion ? 'none' : 'background-color 650ms ease', cursor: inspecting ? 'zoom-out' : 'default' }}>
+    {failed && selected && <div onClick={(event) => { if (inspecting && event.target === event.currentTarget) onBackgroundClick?.(); }} style={{ position: 'absolute', inset: 0, background: theme === 'light' ? '#e4dfd4' : '#171817', transition: reducedMotion ? 'none' : 'background-color 650ms ease', cursor: inspecting ? 'zoom-out' : 'default' }}>
       <button type="button" onClick={(event) => { if (!inspecting) onSelect?.(activeIndex); else if (event.detail > 0 && event.target === event.currentTarget) onBackgroundClick?.(); }} aria-label={t(`Voir ${selected.title}`, `View ${selected.title}`)} style={{ position: 'absolute', ...fallbackBounds, display: 'grid', placeItems: 'center', border: 0, padding: 0, background: 'transparent', cursor: inspecting ? 'default' : 'pointer', transition: reducedMotion ? 'none' : 'left 700ms ease, top 700ms ease, width 700ms ease, height 700ms ease' }}>
         <img src={selected.image} alt={selected.title} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', boxSizing: 'border-box', objectFit: 'contain', display: 'block', border: '6px solid #080909', padding: 20, background: '#e7e4dc', boxShadow: '0 0 70px #fff1c51f' }} />
       </button>

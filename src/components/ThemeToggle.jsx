@@ -7,7 +7,7 @@ export default function ThemeToggle({ theme = "dark", onToggle }) {
   const light = theme === "light";
   const action = light
     ? t("Voir les photographies sur fond sombre", "View photographs against dark walls")
-    : t("Voir les photographies sur fond blanc", "View photographs against white walls");
+    : t("Voir les photographies sur fond crème", "View photographs against cream walls");
 
   return (
     <button className={`theme-toggle${light ? " is-light" : ""}`} type="button" onClick={onToggle} aria-label={action} aria-pressed={light} title={action}>

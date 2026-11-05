@@ -29,7 +29,7 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent 54%, #f5f5f138 65%, #f5f5f1ed 100%);
+  background: linear-gradient(90deg, transparent 54%, #e4dfd438 65%, #e4dfd4ed 100%);
   opacity: 0;
   transition: opacity 650ms ease;
 }
@@ -53,63 +53,63 @@
 /* Change the surroundings rather than filtering the photographs. */
 .museum-mode[data-theme="light"] .gallery-viewport,
 .museum-mode[data-theme="light"] .site-header {
-  --paper: #f5f5f1;
-  --ink: #242823;
-  --muted: #697064;
-  --line: #d2d7cc;
+  --paper: #e4dfd4;
+  --ink: #302b25;
+  --muted: #786f63;
+  --line: #c7beaf;
   --accent: #90683f;
 }
 .museum-mode[data-theme="light"] {
-  color: #242823;
-  background: #f5f5f1;
+  color: #302b25;
+  background: #e4dfd4;
 }
 .museum-mode[data-theme="light"] .site-header {
-  background: #fafaf7;
-  border-bottom-color: #d5d8d0;
+  background: #eee9df;
+  border-bottom-color: #cec5b7;
 }
 .museum-mode[data-theme="light"] .site-header .gallery-logo {
   filter: none;
 }
 .museum-mode[data-theme="light"] .nav-link {
-  color: #666e61;
+  color: #756b5e;
 }
 .museum-mode[data-theme="light"] .nav-link.active,
 .museum-mode[data-theme="light"] .nav-link:hover {
-  color: #20251f;
+  color: #302a23;
 }
 .museum-mode[data-theme="light"] .gallery-viewport,
 .museum-mode[data-theme="light"] .gallery-loading {
-  background: #f5f5f1;
-  color: #3c4537;
+  background: #e4dfd4;
+  color: #4a4035;
 }
 .museum-mode[data-theme="light"] .gallery-appearance {
-  --appearance-bg: #fafaf5ed;
-  --appearance-border: #606b4d45;
-  --appearance-ink: #303b2a;
-  --appearance-hover: #e5e9df;
+  --appearance-bg: #f0ebe1ed;
+  --appearance-border: #8a775c45;
+  --appearance-ink: #42372a;
+  --appearance-hover: #dfd7c8;
   --appearance-focus: #866136;
 }
 .museum-mode[data-theme="light"] .exhibition-title h1 {
-  color: #272c23;
+  color: #342d25;
 }
 .museum-mode[data-theme="light"] .museum-label-copy > span,
 .museum-mode[data-theme="light"] .museum-hint {
-  color: #596252;
+  color: #6d6152;
 }
 .museum-mode[data-theme="light"] .museum-label-rule {
-  background: #737d69;
+  background: #8a7c69;
 }
 .museum-mode[data-theme="light"] .museum-label:hover strong {
   color: #825b32;
 }
 .museum-mode[data-theme="light"] .museum-controls {
-  color: #303a29;
-  background: #fafaf5dd;
-  border-color: #8b957f55;
+  color: #42372a;
+  background: #f0ebe1dd;
+  border-color: #a4978155;
 }
 .museum-mode[data-theme="light"] .museum-controls button:hover,
 .museum-mode[data-theme="light"] .museum-controls .is-active {
-  background: #d9dfd1;
+  background: #d6ccbb;
 }
 .museum-mode[data-theme="light"] .gallery-inspection::before {
   opacity: 0;
@@ -121,53 +121,53 @@
   opacity: 0;
 }
 .museum-mode[data-theme="light"] .inspection-panel {
-  color: #252d21;
-  scrollbar-color: #8c9782 transparent;
+  color: #342c23;
+  scrollbar-color: #aa9b85 transparent;
 }
 .museum-mode[data-theme="light"] .inspection-back,
 .museum-mode[data-theme="light"] .inspection-work-title,
 .museum-mode[data-theme="light"] .inspection-description {
-  color: #515d46;
+  color: #665a4b;
 }
 .museum-mode[data-theme="light"] .inspection-location,
 .museum-mode[data-theme="light"] .inspection-specs dt {
-  color: #65715a;
+  color: #796b58;
 }
 .museum-mode[data-theme="light"] .inspection-specs dd {
-  color: #38452d;
+  color: #4d4132;
 }
 .museum-mode[data-theme="light"] .inspection-specs > div,
 .museum-mode[data-theme="light"] .inspection-panel .photographer-credit {
-  border-color: #7e8b6e3d;
+  border-color: #9f8d713d;
 }
 .museum-mode[data-theme="light"] .inspection-panel .photographer-credit {
-  color: #2c3624;
+  color: #3f3427;
 }
 .museum-mode[data-theme="light"] .inspection-panel .photographer-credit-link,
 .museum-mode[data-theme="light"] .inspection-inquire {
   color: #785831;
 }
 .museum-mode[data-theme="light"] .inspection-explore {
-  color: #303c27;
-  border-color: #6d7b5766;
+  color: #493b2a;
+  border-color: #94806266;
 }
 .museum-mode[data-theme="light"] .inspection-navigation,
 .museum-mode[data-theme="light"] .inspection-mobile-controls {
-  color: #303b27;
+  color: #493b2a;
 }
 .museum-mode[data-theme="light"] .inspection-navigation button,
 .museum-mode[data-theme="light"] .inspection-mobile-controls button {
-  background: #f8f9f3d9;
-  border-color: #7e8b6e66;
+  background: #eee7dad9;
+  border-color: #9f8d7166;
 }
 .museum-mode[data-theme="light"] .inspection-navigation button:hover,
 .museum-mode[data-theme="light"] .inspection-mobile-controls button:hover {
-  background: #e0e6d8;
+  background: #ded3c1;
 }
 .museum-mode[data-theme="light"] .inspection-back:hover,
 .museum-mode[data-theme="light"] .inspection-inquire:hover,
 .museum-mode[data-theme="light"] .inspection-panel .photographer-credit.has-profile:hover .photographer-credit-link {
-  color: #1b2612;
+  color: #302313;
 }
 @media (max-width: 760px) {
   .museum-mode .gallery-appearance {
@@ -177,10 +177,10 @@
     background: linear-gradient(180deg, transparent 43%, #111611a8 49%, #111611f5 64%);
   }
   .museum-mode .gallery-inspection::after {
-    background: linear-gradient(180deg, transparent 43%, #f5f5f1a8 49%, #f5f5f1fa 64%);
+    background: linear-gradient(180deg, transparent 43%, #e4dfd4a8 49%, #e4dfd4fa 64%);
   }
   .museum-mode[data-theme="light"] .inspection-location-row {
-    background: #f5f5f1fa;
+    background: #e4dfd4fa;
   }
 }
 @media (max-width: 600px) {
