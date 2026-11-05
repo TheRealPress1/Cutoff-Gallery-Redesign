@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { bindGalleryPinch } from './galleryPinch.js';
 import { bindGalleryTouch } from './galleryTouch.js';
 import { createGalleryThemeTransition } from './galleryTheme.js';
+import { createGalleryWoodTextures } from './galleryWood.js';
 import { useLanguage } from '../i18n.jsx';
 import { localizeArtwork } from '../data/translations.js';
 
@@ -130,8 +131,13 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     const outerRadius = ROOM_RADIUS / Math.cos(Math.PI / count);
     const grain = stoneTexture();
     textures.add(grain);
+    const wood = createGalleryWoodTextures();
+    for (const texture of Object.values(wood)) {
+      texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      textures.add(texture);
+    }
     const wallMaterial = new THREE.MeshStandardMaterial({ color: '#45443f', map: grain, roughness: 0.98, emissive: '#272a27', emissiveIntensity: 0.5 });
-    const floorMaterial = new THREE.MeshStandardMaterial({ color: '#353731', map: grain, roughness: 0.78, metalness: 0.08, emissive: '#1b211c', emissiveIntensity: 0.45 });
+    const floorMaterial = new THREE.MeshStandardMaterial({ color: '#61554a', map: wood.map, bumpMap: wood.bumpMap, bumpScale: 0.006, roughness: 0.66, metalness: 0, emissive: '#44382c', emissiveMap: wood.map, emissiveIntensity: 0.35 });
     const ceilingMaterial = new THREE.MeshStandardMaterial({ color: '#171817', roughness: 1, emissive: '#191c1b', emissiveIntensity: 0.55 });
     const frameMaterial = new THREE.MeshStandardMaterial({ color: '#080909', roughness: 0.52, metalness: 0.3 });
     const matteMaterial = new THREE.MeshStandardMaterial({ color: '#eeece5', roughness: 1 });
@@ -147,8 +153,8 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     // Photograph lighting, exposure, frames, and mats remain unchanged.
     const themedSurfaces = [
       { material: wallMaterial, color: '#eee7d9', emissive: '#e9dec8', intensity: 0.4 },
-      { material: floorMaterial, color: '#bdb09b', emissive: '#b7a68d', intensity: 0.16 },
-      { material: ceilingMaterial, color: '#d8cebc', emissive: '#d4c7b1', intensity: 0.3 },
+      { material: floorMaterial, color: '#fff7eb', emissive: '#dfc9aa', intensity: 0.12 },
+      { material: ceilingMaterial, color: '#f0ede7', emissive: '#e9e6df', intensity: 0.55 },
       { material: trimMaterial, color: '#c9bda8', emissive: '#c5b89f', intensity: 0.3 },
     ].map(({ material, color, emissive, intensity }) => ({
       material,
@@ -176,14 +182,6 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     const ceiling = new THREE.Mesh(new THREE.CylinderGeometry(outerRadius + 0.1, outerRadius + 0.1, 0.18, count, 1, false, Math.PI / count), ceilingMaterial);
     ceiling.position.y = 6.28;
     scene.add(ceiling);
-    const seamMaterial = new THREE.LineBasicMaterial({ color: '#171917', transparent: true, opacity: 0.7 });
-    const darkSeam = seamMaterial.color.clone();
-    const lightSeam = new THREE.Color('#8b7f6f');
-    for (let i = 0; i < count; i += 1) {
-      const angle = TAU * i / count;
-      const points = [new THREE.Vector3(0, 0.004, 0), new THREE.Vector3(Math.sin(angle) * ROOM_RADIUS, 0.004, -Math.cos(angle) * ROOM_RADIUS)];
-      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), seamMaterial));
-    }
     scene.add(new THREE.HemisphereLight('#d7dcdf', '#252820', 0.8));
     const centralFill = new THREE.PointLight('#e9e8de', 18, 15, 2);
     centralFill.position.set(0, 5.5, 0);
@@ -464,8 +462,6 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
           surface.material.emissive.lerpColors(surface.darkEmissive, surface.lightEmissive, amount);
           surface.material.emissiveIntensity = THREE.MathUtils.lerp(surface.darkIntensity, surface.lightIntensity, amount);
         }
-        seamMaterial.color.lerpColors(darkSeam, lightSeam, amount);
-        seamMaterial.opacity = THREE.MathUtils.lerp(0.7, 0.35, amount);
         for (const label of wallLabels) {
           label.lightLabel.material.opacity = amount;
           label.lightLabel.visible = amount > 0;
