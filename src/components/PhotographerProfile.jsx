@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '../i18n.jsx';
-import LanguageToggle from './LanguageToggle.jsx';
+import AppearanceControls from './AppearanceControls.jsx';
 import GalleryLogo from './GalleryLogo.jsx';
 import './photographer-profile.css';
 
@@ -43,7 +43,7 @@ export default function PhotographerProfile({ photographer, artworks = [], onBac
             <ArrowLeft size={15} strokeWidth={1.5} aria-hidden="true" />
             <span>{t('Retour à la galerie', 'Back to gallery')}</span>
           </button>
-          <LanguageToggle />
+          <AppearanceControls />
         </div>
       </header>
 

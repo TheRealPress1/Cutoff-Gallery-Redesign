@@ -99,6 +99,20 @@
 .print-viewer--zoomed .print-viewer__frame { transform-style: flat; }
 .print-viewer--zoomed .print-viewer__front { transform: none; }
 .print-viewer--zoomed .print-viewer__edge { display: none; }
+.print-viewer--zoomed { --pv-label-background: #161c18f5; }
+.print-viewer--zoomed .print-viewer__eyebrow,
+.print-viewer--zoomed .print-viewer__credit {
+  width: fit-content;
+  max-width: calc(100% - 44px);
+  margin-inline: auto;
+}
+.print-viewer--zoomed .print-viewer__eyebrow,
+.print-viewer--zoomed .print-viewer__angle-control > span,
+.print-viewer--zoomed .print-viewer__credit {
+  border-radius: 2px;
+  background: var(--pv-label-background);
+  box-shadow: 0 0 0 5px var(--pv-label-background);
+}
 .print-viewer--dragging .print-viewer__stage { cursor: grabbing; }
 .print-viewer--dragging .print-viewer__frame { transition: none; }
 .print-viewer__stage:focus-visible {
@@ -217,6 +231,67 @@
   .print-viewer__angle-control > span { font-size: 7px; }
   .print-viewer__angle-buttons button { min-width: 44px; min-height: 27px; }
   .print-viewer__zoom-button { min-height: 32px; font-size: 9px; }
+}
+
+/* The print keeps its physical frame and mat in either gallery atmosphere. */
+:root[data-theme="light"] .detail-art.print-viewer {
+  background: radial-gradient(ellipse at 50% 38%, #f0eadf 0%, #e1d9cc 45%, #cec3b2 100%);
+}
+:root[data-theme="light"] .print-viewer--zoomed {
+  --pv-label-background: #eee9dff5;
+}
+:root[data-theme="light"] .print-viewer__eyebrow,
+:root[data-theme="light"] .print-viewer__angle-control > span,
+:root[data-theme="light"] .print-viewer__credit {
+  color: #6d6458;
+}
+:root[data-theme="light"] .print-viewer__front {
+  box-shadow: inset 0 0 0 1px #888a7c, 0 18px 36px #4d3d2c40;
+}
+:root[data-theme="light"] .print-viewer__stage:focus-visible {
+  outline-color: #90683f;
+}
+:root[data-theme="light"] .print-viewer__angle-buttons {
+  background: #eee9df;
+  border-color: #b9ad9c;
+  box-shadow: 0 2px 8px #5f4c3510;
+}
+:root[data-theme="light"] .print-viewer__angle-buttons button {
+  color: #6d6458;
+}
+:root[data-theme="light"] .print-viewer__angle-buttons button[aria-pressed="true"] {
+  color: #302b25;
+  background: #d6caba;
+}
+:root[data-theme="light"] .print-viewer__angle-buttons button:hover:not(:disabled) {
+  color: #302b25;
+  background: #ded4c6;
+}
+:root[data-theme="light"] .print-viewer__zoom-button {
+  color: #302b25;
+  border-color: #a6937b;
+  background: #eee9df;
+  box-shadow: 0 2px 8px #5f4c3510;
+}
+:root[data-theme="light"] .print-viewer__zoom-button:hover:not(:disabled) {
+  background: #ded4c6;
+}
+:root[data-theme="light"] .print-viewer__status {
+  color: #6d6458;
+}
+:root[data-theme="light"] .print-viewer__status button {
+  color: #302b25;
+  border-color: #a6937b;
+  background: #eee9df;
+}
+:root[data-theme="light"] .print-viewer__status button:hover {
+  background: #ded4c6;
+}
+:root[data-theme="light"] .print-viewer__angle-buttons button:focus-visible,
+:root[data-theme="light"] .print-viewer__zoom-button:focus-visible,
+:root[data-theme="light"] .print-viewer__status button:focus-visible {
+  outline: 1px solid #90683f;
+  outline-offset: 3px;
 }
 @media (prefers-reduced-motion: reduce) {
   .print-viewer__frame,

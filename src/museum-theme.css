@@ -1,16 +1,3 @@
-/* Appearance settings share the main header with the gallery navigation. */
-.museum-mode .gallery-appearance {
-  --appearance-bg: #1b1f20c9;
-  --appearance-border: #747d7066;
-  --appearance-ink: #eeece4;
-  --appearance-hover: #343b36;
-  --appearance-focus: #c7aa7c;
-  margin-left: auto;
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 8px;
-}
 .museum-mode .exhibition-title h1 {
   line-height: 1.15;
 }
@@ -51,43 +38,14 @@
 }
 
 /* Change the surroundings rather than filtering the photographs. */
-.museum-mode[data-theme="light"] .gallery-viewport,
-.museum-mode[data-theme="light"] .site-header {
-  --paper: #e4dfd4;
-  --ink: #302b25;
-  --muted: #786f63;
-  --line: #c7beaf;
-  --accent: #90683f;
-}
 .museum-mode[data-theme="light"] {
   color: #302b25;
   background: #e4dfd4;
-}
-.museum-mode[data-theme="light"] .site-header {
-  background: #eee9df;
-  border-bottom-color: #cec5b7;
-}
-.museum-mode[data-theme="light"] .site-header .gallery-logo {
-  filter: none;
-}
-.museum-mode[data-theme="light"] .nav-link {
-  color: #756b5e;
-}
-.museum-mode[data-theme="light"] .nav-link.active,
-.museum-mode[data-theme="light"] .nav-link:hover {
-  color: #302a23;
 }
 .museum-mode[data-theme="light"] .gallery-viewport,
 .museum-mode[data-theme="light"] .gallery-loading {
   background: #e4dfd4;
   color: #4a4035;
-}
-.museum-mode[data-theme="light"] .gallery-appearance {
-  --appearance-bg: #f0ebe1ed;
-  --appearance-border: #8a775c45;
-  --appearance-ink: #42372a;
-  --appearance-hover: #dfd7c8;
-  --appearance-focus: #866136;
 }
 .museum-mode[data-theme="light"] .exhibition-title h1 {
   color: #342d25;
@@ -170,9 +128,6 @@
   color: #302313;
 }
 @media (max-width: 760px) {
-  .museum-mode .gallery-appearance {
-    gap: 6px;
-  }
   .museum-mode .gallery-inspection::before {
     background: linear-gradient(180deg, transparent 43%, #111611a8 49%, #111611f5 64%);
   }
@@ -181,12 +136,6 @@
   }
   .museum-mode[data-theme="light"] .inspection-location-row {
     background: #e4dfd4fa;
-  }
-}
-@media (max-width: 600px) {
-  .site-shell .site-header > .gallery-appearance {
-    grid-column: 2;
-    grid-row: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

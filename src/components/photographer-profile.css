@@ -357,6 +357,9 @@
   }
 }
 @media (max-width: 1000px) {
+  .photographer-profile-context {
+    display: none;
+  }
   .photographer-profile-hero {
     column-gap: 40px;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -490,15 +493,97 @@
 }
 @media (max-width: 540px) {
   .photographer-profile-header-actions {
-    gap: 12px;
+    gap: 8px;
   }
   .photographer-profile-header .photographer-profile-back {
-    width: 32px;
+    width: 44px;
     padding: 0;
   }
   .photographer-profile-header .photographer-profile-back > span {
     display: none;
   }
+}
+@media (max-width: 360px) {
+  .photographer-profile-header {
+    padding-inline: 16px;
+    gap: 8px;
+  }
+  .photographer-profile-header-actions,
+  .photographer-profile-header .appearance-controls {
+    gap: 6px;
+  }
+}
+
+/* The page follows the chosen gallery atmosphere; the photographs keep their
+   original pixels and the physical print frames retain their materials. */
+:root[data-theme="light"] .photographer-profile {
+  --profile-paper: #302b25;
+  --profile-muted: #6b6257;
+  --profile-line: #c7beaf;
+  background: #e4dfd4;
+  scrollbar-color: #a69b89 #e4dfd4;
+}
+:root[data-theme="light"] .photographer-profile-header {
+  background: #eee9dff5;
+  border-bottom-color: #c7beaf;
+}
+:root[data-theme="light"] .photographer-profile-brand .gallery-logo {
+  filter: none;
+}
+:root[data-theme="light"] .photographer-profile-context,
+:root[data-theme="light"] .photographer-profile-portrait-caption,
+:root[data-theme="light"] .photographer-profile-facts dt,
+:root[data-theme="light"] .photographer-profile-section-label,
+:root[data-theme="light"] .photographer-profile-work-place,
+:root[data-theme="light"] .photographer-profile-work-medium,
+:root[data-theme="light"] .photographer-profile-sources,
+:root[data-theme="light"] .photographer-profile-sources > span {
+  color: var(--profile-muted);
+}
+:root[data-theme="light"] .photographer-profile-back,
+:root[data-theme="light"] .photographer-profile-headline,
+:root[data-theme="light"] .photographer-profile-facts dd {
+  color: #40382f;
+}
+:root[data-theme="light"] .photographer-profile-intro,
+:root[data-theme="light"] .photographer-profile-biography,
+:root[data-theme="light"] .photographer-profile-work-title {
+  color: #665d52;
+}
+:root[data-theme="light"] .photographer-profile-portrait-image {
+  background: #d8d0c2;
+  border-color: #c7beaf;
+}
+:root[data-theme="light"] .photographer-profile-initials {
+  color: #817463;
+}
+:root[data-theme="light"] .photographer-profile-works,
+:root[data-theme="light"] .photographer-profile-footer {
+  border-color: #c7beaf;
+}
+:root[data-theme="light"] .photographer-profile-work-image {
+  background: #dcd5c8;
+  border-color: #c7beaf;
+}
+:root[data-theme="light"] .photographer-profile-work-link {
+  color: #785831;
+  border-color: #a58a68;
+}
+:root[data-theme="light"] .photographer-profile-sources a {
+  text-decoration-color: #a58a68;
+}
+:root[data-theme="light"] .photographer-profile-back:hover,
+:root[data-theme="light"] .photographer-profile-portrait-caption a:hover,
+:root[data-theme="light"] .photographer-profile-sources a:hover,
+:root[data-theme="light"] .photographer-profile-work:hover .photographer-profile-work-link {
+  color: #302b25;
+}
+:root[data-theme="light"] .photographer-profile-work:hover .photographer-profile-work-link {
+  border-color: #90683f;
+}
+:root[data-theme="light"] .photographer-profile button:focus-visible,
+:root[data-theme="light"] .photographer-profile a:focus-visible {
+  outline-color: #90683f;
 }
 @media (prefers-reduced-motion: reduce) {
   .photographer-profile *,

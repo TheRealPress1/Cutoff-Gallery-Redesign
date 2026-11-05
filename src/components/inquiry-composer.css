@@ -541,3 +541,102 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Correspondence follows the selected gallery atmosphere, including native fields. */
+:root[data-theme="light"] .modal-backdrop.composer-backdrop {
+  background: #e4dfd4;
+}
+:root[data-theme="light"] .modal.inquiry-modal {
+  --composer-ink: #302b25;
+  --composer-muted: #786f63;
+  --composer-accent: #90683f;
+  color-scheme: light;
+  color: var(--composer-ink);
+  background: radial-gradient(ellipse at 82% 38%, #c6af8e26, transparent 46%), #e4dfd4;
+  scrollbar-color: #a99b87 transparent;
+}
+:root[data-theme="light"] .modal.inquiry-modal > .modal-close {
+  color: #6d6458;
+  border-color: #c7beaf;
+  background: #eee9df;
+}
+:root[data-theme="light"] .modal.inquiry-modal > .modal-close:hover {
+  color: #302b25;
+  background: #d8cebe;
+}
+:root[data-theme="light"] .inquiry-modal .composer-wordmark,
+:root[data-theme="light"] .inquiry-modal .composer-recipient strong {
+  color: #302b25;
+}
+:root[data-theme="light"] .inquiry-modal .composer-wordmark > span,
+:root[data-theme="light"] .inquiry-modal .composer-address-row > span,
+:root[data-theme="light"] .inquiry-modal .composer-recipient > span {
+  color: #6d6458;
+}
+:root[data-theme="light"] .inquiry-modal .composer-address-row input,
+:root[data-theme="light"] .inquiry-modal textarea.composer-message {
+  color: #40392f;
+  caret-color: #90683f;
+}
+:root[data-theme="light"] .inquiry-modal .composer-address-row input::placeholder,
+:root[data-theme="light"] .inquiry-modal textarea.composer-message::placeholder {
+  color: #786f63;
+}
+:root[data-theme="light"] .inquiry-modal .composer-address-row input:focus,
+:root[data-theme="light"] .inquiry-modal textarea.composer-message:focus-visible {
+  border-bottom-color: #90683f;
+}
+:root[data-theme="light"] .inquiry-modal .composer-address-row input:invalid:not(:placeholder-shown) {
+  border-bottom-color: #a15938;
+}
+:root[data-theme="light"] .inquiry-modal .composer-address-row input:autofill {
+  color: #302b25;
+  background: #eee9df;
+}
+:root[data-theme="light"] .inquiry-modal .composer-address-row input:-webkit-autofill {
+  -webkit-text-fill-color: #302b25;
+  -webkit-box-shadow: inset 0 0 0 100px #eee9df;
+}
+:root[data-theme="light"] .inquiry-modal .composer-recipient {
+  color: #40392f;
+}
+:root[data-theme="light"] .inquiry-modal textarea.composer-message {
+  scrollbar-color: #a99b87 transparent;
+}
+:root[data-theme="light"] .inquiry-modal .composer-send {
+  color: #302b25;
+}
+:root[data-theme="light"] .inquiry-modal .composer-send > svg {
+  color: #90683f;
+  border-color: #ad9677;
+}
+:root[data-theme="light"] .inquiry-modal .composer-send:hover:not(:disabled) {
+  color: #79522d;
+}
+:root[data-theme="light"] .inquiry-modal .composer-send:hover:not(:disabled) > svg {
+  border-color: #79522d;
+}
+:root[data-theme="light"] .inquiry-modal .composer-copy {
+  color: #6d6458;
+}
+:root[data-theme="light"] .inquiry-modal .composer-copy:hover {
+  color: #302b25;
+}
+:root[data-theme="light"] .inquiry-modal .composer-feedback {
+  color: #79522d;
+}
+:root[data-theme="light"] .inquiry-modal .composer-print {
+  box-shadow: 2px 2px 0 #f9f4e899, 10px 20px 45px #53432e33;
+}
+:root[data-theme="light"] .inquiry-modal .composer-artwork-note,
+:root[data-theme="light"] .inquiry-modal .composer-no-artwork > p {
+  color: #6d6458;
+}
+:root[data-theme="light"] .inquiry-modal .composer-no-artwork {
+  color: #78634b;
+}
+:root[data-theme="light"] .inquiry-modal .composer-send:focus-visible,
+:root[data-theme="light"] .inquiry-modal .composer-copy:focus-visible,
+:root[data-theme="light"] .modal.inquiry-modal > .modal-close:focus-visible {
+  outline-color: #90683f;
+}

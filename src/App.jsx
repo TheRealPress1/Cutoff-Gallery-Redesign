@@ -15,9 +15,9 @@ import GalleryInspection from "./components/GalleryInspection.jsx";
 import PrintViewer from "./components/PrintViewer.jsx";
 import PhotographerCredit from "./components/PhotographerCredit.jsx";
 import PhotographerProfile from "./components/PhotographerProfile.jsx";
-import LanguageToggle from "./components/LanguageToggle.jsx";
-import ThemeToggle from "./components/ThemeToggle.jsx";
+import AppearanceControls from "./components/AppearanceControls.jsx";
 import { useLanguage } from "./i18n.jsx";
+import { useTheme } from "./theme.jsx";
 import { artworks } from "./data/artworks.js";
 import InquiryComposer from "./components/InquiryComposer.jsx";
 import { photographers } from "./data/photographers.js";
@@ -106,7 +106,7 @@ function Modal({ children, onClose, className = "", label, fullScreen = false })
         >
           {fullScreen ? <ArrowLeft size={21} /> : <X size={22} />}
         </button>
-        <div className="modal-language"><LanguageToggle /></div>
+        <div className="modal-language"><AppearanceControls /></div>
         {children}
       </section>
     </div>
@@ -207,6 +207,7 @@ function About({ onClose, onInquire }) {
 
 export default function App() {
   const { language, t } = useLanguage();
+  const { theme: museumTheme } = useTheme();
   const localizedArtworks = useMemo(() => artworks.map((artwork) => localizeArtwork(artwork, language)), [language]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [viewedIndex, setViewedIndex] = useState(0);
@@ -216,7 +217,6 @@ export default function App() {
   const [focused, setFocused] = useState(false);
   const [inspecting, setInspecting] = useState(false);
   const [immersive, setImmersive] = useState(false);
-  const [museumTheme, setMuseumTheme] = useState("dark");
   const [approaching, setApproaching] = useState(false);
   const approachTimer = useRef(null);
   const museumLabel = useRef(null);
@@ -489,12 +489,7 @@ export default function App() {
             About
           </button>
         </nav>
-        {view === "gallery" ? (
-          <div className="gallery-appearance" role="group" aria-label={t("Ambiance et langue", "Gallery appearance and language")}>
-            <ThemeToggle theme={museumTheme} onToggle={() => setMuseumTheme((current) => current === "dark" ? "light" : "dark")} />
-            <LanguageToggle />
-          </div>
-        ) : <LanguageToggle />}
+        <AppearanceControls />
       </header>
       <main>
         {view === "collection" && (

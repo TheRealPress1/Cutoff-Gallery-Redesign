@@ -1,0 +1,157 @@
+/* One palette and one set of controls across the room, pages, and dialogs. */
+:root {
+  color-scheme: dark;
+  --appearance-bg: #1b1f20c9;
+  --appearance-border: #747d7066;
+  --appearance-ink: #eeece4;
+  --appearance-hover: #343b36;
+  --appearance-focus: #c7aa7c;
+}
+.appearance-controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+.site-header > .appearance-controls {
+  margin-left: auto;
+}
+.modal:not(.inquiry-modal) > .modal-close {
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+}
+.modal:not(.inquiry-modal) > .modal-language {
+  right: 64px;
+}
+@media (min-width: 761px) {
+  .artwork-modal .detail-copy,
+  .story-modal .story-copy {
+    padding-top: 78px;
+  }
+}
+@media (max-width: 760px) {
+  .appearance-controls {
+    gap: 6px;
+  }
+  .inquiry-modal .composer-wordmark {
+    margin-right: 108px;
+  }
+}
+@media (max-width: 600px) {
+  .site-shell .site-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .site-shell .site-header > .appearance-controls {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+@media (max-width: 360px) {
+  .inquiry-modal .composer-wordmark {
+    font-size: 13px;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  color: #302b25;
+  background: #e4dfd4;
+  --paper: #e4dfd4;
+  --ink: #302b25;
+  --muted: #6b6257;
+  --line: #c7beaf;
+  --accent: #90683f;
+  --appearance-bg: #f0ebe1ed;
+  --appearance-border: #8a775c45;
+  --appearance-ink: #42372a;
+  --appearance-hover: #dfd7c8;
+  --appearance-focus: #866136;
+}
+:root[data-theme="light"] ::selection {
+  background: #cbb898;
+  color: #302b25;
+}
+:root[data-theme="light"] .site-header {
+  background: #eee9df;
+  border-bottom-color: #cec5b7;
+}
+:root[data-theme="light"] .gallery-logo {
+  filter: none;
+}
+:root[data-theme="light"] .nav-link {
+  color: #756b5e;
+}
+:root[data-theme="light"] .nav-link.active,
+:root[data-theme="light"] .nav-link:hover {
+  color: #302a23;
+}
+:root[data-theme="light"] .collection-image {
+  background: #d9d1c3;
+}
+:root[data-theme="light"] .collection-image img {
+  box-shadow: 0 15px 35px #4d3d2c38;
+}
+:root[data-theme="light"] .collection-card:hover img {
+  box-shadow: 0 18px 38px #4d3d2c4a;
+}
+:root[data-theme="light"] .collection-caption p,
+:root[data-theme="light"] .collection-intro-note,
+:root[data-theme="light"] .collection-number {
+  color: #6b6257;
+}
+:root[data-theme="light"] .collection-view {
+  background: #f0ebe1f2;
+  color: #302b25;
+}
+:root[data-theme="light"] .modal-backdrop {
+  background: #71685870;
+}
+:root[data-theme="light"] .modal {
+  background: #eae4d9;
+  color: #302b25;
+  border-color: #c7beaf;
+  box-shadow: 0 30px 100px #4d3d2c45;
+}
+:root[data-theme="light"] .modal-close {
+  background: #f0ebe1ed;
+  border-color: #8a775c45;
+  color: #42372a;
+}
+:root[data-theme="light"] .icon-button:hover {
+  background: #dfd7c8;
+}
+:root[data-theme="light"] .detail-location,
+:root[data-theme="light"] .detail-title,
+:root[data-theme="light"] .detail-description,
+:root[data-theme="light"] .detail-specs dt,
+:root[data-theme="light"] .detail-footnote,
+:root[data-theme="light"] .source-link {
+  color: #6b6257;
+}
+:root[data-theme="light"] .detail-specs dd {
+  color: #40382f;
+}
+:root[data-theme="light"] .source-link:hover {
+  color: #785831;
+}
+:root[data-theme="light"] .dark-button {
+  color: #f3eee5;
+  background: #433b31;
+}
+:root[data-theme="light"] .dark-button:hover {
+  background: #302b25;
+}
+:root[data-theme="light"] .story-image {
+  background: #d8d0c2;
+}
+:root[data-theme="light"] .story-image img {
+  filter: none;
+}
+:root[data-theme="light"] .story-copy > p {
+  color: #665d52;
+}
+:root[data-theme="light"] .story-copy > .story-intro {
+  color: #302b25;
+}
