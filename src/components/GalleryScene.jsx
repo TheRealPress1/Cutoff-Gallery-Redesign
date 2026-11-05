@@ -127,6 +127,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     const galleryLights = [];
     const dimensions = [];
     const wallLabels = [];
+    const wallReveals = [];
     let renderedLanguage = controlsRef.current.language;
     const count = Math.max(artworks.length, 4);
     const wallWidth = 2 * ROOM_RADIUS * Math.tan(Math.PI / count) + 0.06;
@@ -146,6 +147,9 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     const matteMaterial = new THREE.MeshStandardMaterial({ color: '#eeece5', roughness: 1 });
     const fixtureMaterial = new THREE.MeshStandardMaterial({ color: '#3b3e38', roughness: 0.56, metalness: 0.3, emissive: '#30332e', emissiveIntensity: 0.2 });
     const trimMaterial = fixtureMaterial.clone();
+    const fadingRevealMaterial = trimMaterial.clone();
+    fadingRevealMaterial.transparent = true;
+    fadingRevealMaterial.depthWrite = false;
     const lensMaterial = new THREE.MeshBasicMaterial({ color: '#fff2d8', toneMapped: false });
     const themeTransition = createGalleryThemeTransition(controlsRef.current.theme);
     let renderedThemeAmount = -1;
@@ -216,7 +220,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       box(bay, wallWidth, 6.2, 0.3, wallMaterial, 0, 3.1, -0.15);
       box(bay, wallWidth, 0.08, 0.04, trimMaterial, 0, 0.045, 0.025);
       // Slim vertical reveals make the changes in wall angle legible in the low light.
-      box(bay, 0.045, 6.2, 0.055, trimMaterial, -wallWidth / 2 + 0.035, 3.1, 0.03);
+      wallReveals.push(box(bay, 0.045, 6.2, 0.055, trimMaterial, -wallWidth / 2 + 0.035, 3.1, 0.03));
       const artwork = artworks[i];
       if (!artwork) continue;
       const aspect = Number(artwork.aspectRatio) || 1.5;
@@ -297,6 +301,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     let viewDistance = 9.5;
     let viewShiftX = 0;
     let viewShiftY = 0;
+    let viewInspection = inspecting ? 1 : 0;
     let hostWidth = 1;
     let hostHeight = 1;
     let lastInspecting = inspecting;
@@ -577,6 +582,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       // The mobile lens offset raises the picture without moving the camera below the floor.
       const targetShiftX = current.inspecting && !compactInspection ? 0.36 : 0;
       const targetShiftY = current.inspecting && compactInspection ? 0.26 : 0;
+      const targetInspection = current.inspecting ? 1 : 0;
       const targetAngle = TAU * index / count;
       const angleDelta = THREE.MathUtils.euclideanModulo(targetAngle - viewAngle + Math.PI, TAU) - Math.PI;
       const yawDelta = targetYaw - viewYaw;
@@ -587,6 +593,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         viewDistance = targetDistance;
         viewShiftX = targetShiftX;
         viewShiftY = targetShiftY;
+        viewInspection = targetInspection;
         firstFrame = false;
       } else {
         const ease = 1 - Math.exp(-delta * 5.8);
@@ -596,6 +603,20 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         viewDistance += (targetDistance - viewDistance) * ease;
         viewShiftX += (targetShiftX - viewShiftX) * ease;
         viewShiftY += (targetShiftY - viewShiftY) * ease;
+        viewInspection += (targetInspection - viewInspection) * ease;
+      }
+      if (Math.abs(targetInspection - viewInspection) < 0.0001) viewInspection = targetInspection;
+      // Keep the cream wall uninterrupted behind the close-up information.
+      // Fade only the vertical reveals; the room overview and dark trim retain
+      // their original opaque material, including baseboards and fixtures.
+      const revealOpacity = 1 - roomTheme.value * viewInspection;
+      fadingRevealMaterial.color.copy(trimMaterial.color);
+      fadingRevealMaterial.emissive.copy(trimMaterial.emissive);
+      fadingRevealMaterial.emissiveIntensity = trimMaterial.emissiveIntensity;
+      fadingRevealMaterial.opacity = revealOpacity;
+      for (const reveal of wallReveals) {
+        reveal.visible = revealOpacity > 0;
+        reveal.material = revealOpacity === 1 ? trimMaterial : fadingRevealMaterial;
       }
       const sin = Math.sin(viewAngle);
       const cos = Math.cos(viewAngle);
@@ -654,7 +675,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         }
       });
       renderer.render(scene, camera);
-      if (roomTheme.active || detailAnimating || Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
+      if (roomTheme.active || detailAnimating || viewInspection !== targetInspection || Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
     }
     function visibilityChange() {
       if (document.hidden && frame !== null) { cancelAnimationFrame(frame); frame = null; }
@@ -686,6 +707,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       renderer.domElement.removeEventListener('lostpointercapture', pointerCancel);
       const geometries = new Set();
       const materials = new Set();
+      materials.add(fadingRevealMaterial);
       scene.traverse((object) => {
         if (object.geometry) geometries.add(object.geometry);
         if (object.isLight && object.shadow) object.shadow.dispose();
