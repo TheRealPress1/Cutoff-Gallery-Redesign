@@ -137,7 +137,8 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       textures.add(texture);
     }
     const wallMaterial = new THREE.MeshStandardMaterial({ color: '#45443f', map: grain, roughness: 0.98, emissive: '#272a27', emissiveIntensity: 0.5 });
-    const floorMaterial = new THREE.MeshStandardMaterial({ color: '#61554a', map: wood.map, bumpMap: wood.bumpMap, bumpScale: 0.006, roughness: 0.66, metalness: 0, emissive: '#44382c', emissiveMap: wood.map, emissiveIntensity: 0.35 });
+    const floorMaterial = new THREE.MeshStandardMaterial({ color: '#353731', map: grain, roughness: 0.78, metalness: 0.08, emissive: '#1b211c', emissiveIntensity: 0.45 });
+    const woodFloorMaterial = new THREE.MeshStandardMaterial({ color: '#fff7eb', map: wood.map, bumpMap: wood.bumpMap, bumpScale: 0.006, roughness: 0.66, metalness: 0, emissive: '#dfc9aa', emissiveMap: wood.map, emissiveIntensity: 0.12, transparent: true, opacity: 0, depthWrite: false });
     const ceilingMaterial = new THREE.MeshStandardMaterial({ color: '#171817', roughness: 1, emissive: '#191c1b', emissiveIntensity: 0.55 });
     const frameMaterial = new THREE.MeshStandardMaterial({ color: '#080909', roughness: 0.52, metalness: 0.3 });
     const matteMaterial = new THREE.MeshStandardMaterial({ color: '#eeece5', roughness: 1 });
@@ -153,7 +154,6 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     // Photograph lighting, exposure, frames, and mats remain unchanged.
     const themedSurfaces = [
       { material: wallMaterial, color: '#eee7d9', emissive: '#e9dec8', intensity: 0.4 },
-      { material: floorMaterial, color: '#fff7eb', emissive: '#dfc9aa', intensity: 0.12 },
       { material: ceilingMaterial, color: '#f0ede7', emissive: '#e9e6df', intensity: 0.55 },
       { material: trimMaterial, color: '#c9bda8', emissive: '#c5b89f', intensity: 0.3 },
     ].map(({ material, color, emissive, intensity }) => ({
@@ -179,6 +179,22 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     floor.position.y = -0.08;
     floor.receiveShadow = true;
     scene.add(floor);
+    // Preserve the original dark stone floor. Oak fades in only for light mode.
+    const woodFloor = new THREE.Mesh(floor.geometry, woodFloorMaterial);
+    woodFloor.position.y = floor.position.y + 0.001;
+    woodFloor.receiveShadow = true;
+    woodFloor.renderOrder = 1;
+    scene.add(woodFloor);
+    const floorSeams = new THREE.Group();
+    const seamMaterial = new THREE.LineBasicMaterial({ color: '#171917', transparent: true, opacity: 0.7 });
+    for (let i = 0; i < count; i += 1) {
+      const angle = TAU * i / count;
+      const points = [new THREE.Vector3(0, 0.004, 0), new THREE.Vector3(Math.sin(angle) * ROOM_RADIUS, 0.004, -Math.cos(angle) * ROOM_RADIUS)];
+      const seam = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), seamMaterial);
+      seam.renderOrder = 2;
+      floorSeams.add(seam);
+    }
+    scene.add(floorSeams);
     const ceiling = new THREE.Mesh(new THREE.CylinderGeometry(outerRadius + 0.1, outerRadius + 0.1, 0.18, count, 1, false, Math.PI / count), ceilingMaterial);
     ceiling.position.y = 6.28;
     scene.add(ceiling);
@@ -462,6 +478,10 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
           surface.material.emissive.lerpColors(surface.darkEmissive, surface.lightEmissive, amount);
           surface.material.emissiveIntensity = THREE.MathUtils.lerp(surface.darkIntensity, surface.lightIntensity, amount);
         }
+        woodFloorMaterial.opacity = amount;
+        woodFloor.visible = amount > 0;
+        seamMaterial.opacity = 0.7 * (1 - amount);
+        floorSeams.visible = amount < 1;
         for (const label of wallLabels) {
           label.lightLabel.material.opacity = amount;
           label.lightLabel.visible = amount > 0;
