@@ -1,0 +1,214 @@
+/* Room controls remain reachable when the header is tucked away. */
+.museum-mode .gallery-appearance {
+  --appearance-bg: #1b1f20c9;
+  --appearance-border: #747d7066;
+  --appearance-ink: #eeece4;
+  --appearance-hover: #343b36;
+  --appearance-focus: #c7aa7c;
+  position: absolute;
+  top: var(--gallery-control-top);
+  right: var(--gallery-control-right);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.museum-mode .gallery-topbar {
+  right: calc(var(--gallery-control-right) + 116px);
+}
+.museum-mode .exhibition-title h1 {
+  line-height: 1.15;
+}
+.museum-mode .museum-controls {
+  flex-shrink: 0;
+}
+.museum-mode .gallery-fullscreen {
+  flex-shrink: 0;
+}
+.museum-mode .gallery-inspection::before {
+  z-index: -2;
+}
+.museum-mode .gallery-inspection::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 54%, #f5f5f138 65%, #f5f5f1ed 100%);
+  opacity: 0;
+  transition: opacity 650ms ease;
+}
+.museum-mode .inspection-panel p,
+.museum-mode .inspection-panel dt,
+.museum-mode .inspection-panel dd,
+.museum-mode .inspection-panel button,
+.museum-mode .photographer-credit,
+.museum-mode .photographer-credit-link,
+.museum-mode .museum-label,
+.museum-mode .museum-label-copy > span,
+.museum-mode .museum-hint,
+.museum-mode .exhibition-title h1,
+.museum-mode .inspection-back {
+  transition: color 650ms ease;
+}
+.museum-mode .inspection-panel {
+  transition: opacity 0.65s ease, translate 0.65s ease, color 650ms ease;
+}
+
+/* Change the surroundings rather than filtering the photographs. */
+.museum-mode[data-theme="light"] .gallery-viewport,
+.museum-mode[data-theme="light"] .site-header {
+  --paper: #f5f5f1;
+  --ink: #242823;
+  --muted: #697064;
+  --line: #d2d7cc;
+  --accent: #90683f;
+}
+.museum-mode[data-theme="light"] {
+  color: #242823;
+  background: #f5f5f1;
+}
+.museum-mode[data-theme="light"] .site-header {
+  background: #fafaf7;
+  border-bottom-color: #d5d8d0;
+}
+.museum-mode[data-theme="light"] .site-header .gallery-logo {
+  filter: none;
+}
+.museum-mode[data-theme="light"] .nav-link {
+  color: #666e61;
+}
+.museum-mode[data-theme="light"] .nav-link.active,
+.museum-mode[data-theme="light"] .nav-link:hover {
+  color: #20251f;
+}
+.museum-mode[data-theme="light"] .gallery-viewport,
+.museum-mode[data-theme="light"] .gallery-loading {
+  background: #f5f5f1;
+  color: #3c4537;
+}
+.museum-mode[data-theme="light"] .gallery-appearance {
+  --appearance-bg: #fafaf5ed;
+  --appearance-border: #606b4d45;
+  --appearance-ink: #303b2a;
+  --appearance-hover: #e5e9df;
+  --appearance-focus: #866136;
+}
+.museum-mode[data-theme="light"] .exhibition-title h1 {
+  color: #272c23;
+}
+.museum-mode[data-theme="light"] .museum-label-copy > span,
+.museum-mode[data-theme="light"] .museum-hint {
+  color: #596252;
+}
+.museum-mode[data-theme="light"] .museum-label-rule {
+  background: #737d69;
+}
+.museum-mode[data-theme="light"] .museum-label:hover strong {
+  color: #825b32;
+}
+.museum-mode[data-theme="light"] .museum-controls {
+  color: #303a29;
+  background: #fafaf5dd;
+  border-color: #8b957f55;
+}
+.museum-mode[data-theme="light"] .museum-controls button:hover,
+.museum-mode[data-theme="light"] .museum-controls .is-active {
+  background: #d9dfd1;
+}
+.museum-mode[data-theme="light"] .gallery-inspection::before {
+  opacity: 0;
+}
+.museum-mode[data-theme="light"] .gallery-inspection::after {
+  opacity: 1;
+}
+.museum-mode .gallery-inspection.is-arriving::after {
+  opacity: 0;
+}
+.museum-mode[data-theme="light"] .inspection-panel {
+  color: #252d21;
+  scrollbar-color: #8c9782 transparent;
+}
+.museum-mode[data-theme="light"] .inspection-back,
+.museum-mode[data-theme="light"] .inspection-work-title,
+.museum-mode[data-theme="light"] .inspection-description {
+  color: #515d46;
+}
+.museum-mode[data-theme="light"] .inspection-location,
+.museum-mode[data-theme="light"] .inspection-specs dt {
+  color: #65715a;
+}
+.museum-mode[data-theme="light"] .inspection-specs dd {
+  color: #38452d;
+}
+.museum-mode[data-theme="light"] .inspection-specs > div,
+.museum-mode[data-theme="light"] .inspection-panel .photographer-credit {
+  border-color: #7e8b6e3d;
+}
+.museum-mode[data-theme="light"] .inspection-panel .photographer-credit {
+  color: #2c3624;
+}
+.museum-mode[data-theme="light"] .inspection-panel .photographer-credit-link,
+.museum-mode[data-theme="light"] .inspection-inquire {
+  color: #785831;
+}
+.museum-mode[data-theme="light"] .inspection-explore {
+  color: #303c27;
+  border-color: #6d7b5766;
+}
+.museum-mode[data-theme="light"] .inspection-navigation,
+.museum-mode[data-theme="light"] .inspection-mobile-controls {
+  color: #303b27;
+}
+.museum-mode[data-theme="light"] .inspection-navigation button,
+.museum-mode[data-theme="light"] .inspection-mobile-controls button {
+  background: #f8f9f3d9;
+  border-color: #7e8b6e66;
+}
+.museum-mode[data-theme="light"] .inspection-navigation button:hover,
+.museum-mode[data-theme="light"] .inspection-mobile-controls button:hover {
+  background: #e0e6d8;
+}
+.museum-mode[data-theme="light"] .inspection-back:hover,
+.museum-mode[data-theme="light"] .inspection-inquire:hover,
+.museum-mode[data-theme="light"] .inspection-panel .photographer-credit.has-profile:hover .photographer-credit-link {
+  color: #1b2612;
+}
+@media (max-width: 760px) {
+  .museum-mode .gallery-topbar {
+    right: calc(var(--gallery-control-right) + 108px);
+  }
+  .museum-mode .gallery-appearance {
+    gap: 6px;
+  }
+  .museum-mode.inspecting-artwork .gallery-appearance {
+    top: 0;
+    right: 12px;
+  }
+  .museum-mode .gallery-inspection::before {
+    background: linear-gradient(180deg, transparent 43%, #111611a8 49%, #111611f5 64%);
+  }
+  .museum-mode .gallery-inspection::after {
+    background: linear-gradient(180deg, transparent 43%, #f5f5f1a8 49%, #f5f5f1fa 64%);
+  }
+  .museum-mode[data-theme="light"] .inspection-location-row {
+    background: #f5f5f1fa;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .museum-mode .gallery-inspection::after,
+  .museum-mode .inspection-panel,
+  .museum-mode .inspection-panel p,
+  .museum-mode .inspection-panel dt,
+  .museum-mode .inspection-panel dd,
+  .museum-mode .inspection-panel button,
+  .museum-mode .photographer-credit,
+  .museum-mode .photographer-credit-link,
+  .museum-mode .museum-label,
+  .museum-mode .museum-label-copy > span,
+  .museum-mode .museum-hint,
+  .museum-mode .exhibition-title h1,
+  .museum-mode .inspection-back {
+    transition: none;
+  }
+}

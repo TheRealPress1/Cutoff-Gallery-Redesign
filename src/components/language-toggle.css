@@ -2,57 +2,95 @@
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  gap: 0;
-  padding: 3px;
-  color: #777e74;
-  border: 1px solid #858e703d;
+  color: var(--appearance-ink, #e3e5dc);
 }
 .language-toggle button {
+  display: grid;
+  place-items: center;
   position: relative;
-  isolation: isolate;
-  min-width: 42px;
-  min-height: 36px;
-  padding: 8px;
-  color: #969d91;
-  font-size: 10px;
-  letter-spacing: 0.7px;
-  transition: color 150ms ease;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--appearance-border, #858e703d);
+  background: var(--appearance-bg, #171b17ed);
+  color: inherit;
+  transition: background-color 180ms ease, border-color 180ms ease;
 }
-.language-toggle button::before {
-  content: "";
+.language-toggle button:hover {
+  background: var(--appearance-hover, #343a32);
+}
+.language-toggle button:focus-visible {
+  outline: 1px solid var(--appearance-focus, #c7aa7c);
+  outline-offset: 3px;
+}
+.language-toggle-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  perspective: 100px;
+}
+.language-toggle-flag {
+  display: block;
+  width: 28px;
+  max-height: 20px;
+  overflow: hidden;
+  border-radius: 1.5px;
+  filter: drop-shadow(0 0 0.5px #0005);
+}
+.language-toggle-outgoing,
+.language-toggle-incoming,
+.language-toggle-globe {
   position: absolute;
   inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: transparent;
-  transition: background-color 150ms ease;
+  display: grid;
+  place-items: center;
+  backface-visibility: hidden;
 }
-.language-toggle button[lang="fr"]::before {
-  right: -5px;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+.language-toggle-outgoing {
+  animation: language-flag-out 600ms ease both;
 }
-.language-toggle button[lang="en"]::before {
-  left: -5px;
-  clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+.language-toggle-globe {
+  backface-visibility: visible;
+  animation: language-globe-turn 600ms ease-in-out both;
 }
-.language-toggle button[aria-pressed="true"] {
-  color: #eee9dc;
+.language-toggle-incoming {
+  animation: language-flag-in 600ms ease both;
 }
-.language-toggle button[aria-pressed="true"]::before {
-  background: #a68a5c20;
+.language-toggle-description {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
-.language-toggle button:hover { color: #fff8e7; }
-.language-toggle button:focus-visible { outline: 1px solid #c7aa7c; outline-offset: 1px; }
+@keyframes language-flag-out {
+  0% { opacity: 1; transform: rotateY(0) scale(1); }
+  22%, 100% { opacity: 0; transform: rotateY(85deg) scale(0.75); }
+}
+@keyframes language-globe-turn {
+  0%, 12% { opacity: 0; transform: rotateY(-70deg) rotate(-20deg) scale(0.6); }
+  28% { opacity: 1; transform: rotateY(0) rotate(0) scale(1); }
+  66% { opacity: 1; transform: rotateY(180deg) rotate(20deg) scale(1); }
+  85%, 100% { opacity: 0; transform: rotateY(270deg) rotate(25deg) scale(0.7); }
+}
+@keyframes language-flag-in {
+  0%, 68% { opacity: 0; transform: rotateY(-85deg) scale(0.75); }
+  100% { opacity: 1; transform: rotateY(0) scale(1); }
+}
 .modal-language {
   position: absolute;
   top: 12px;
   right: 63px;
   z-index: 5;
 }
-.modal-language .language-toggle { background: #171b17ed; }
 @media (max-width: 760px) {
   .site-header > .language-toggle { margin-left: auto; }
-  .language-toggle button { min-width: 36px; min-height: 34px; padding: 7px; }
   .artwork-modal .print-viewer__eyebrow { top: 62px; }
 }
 @media (max-width: 600px) {
@@ -77,6 +115,8 @@
   .site-shell .site-header .nav-link { font-size: 10px; padding: 10px 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .language-toggle button,
-  .language-toggle button::before { transition: none; }
+  .language-toggle button { transition: none; }
+  .language-toggle-outgoing,
+  .language-toggle-globe { animation: none; display: none; }
+  .language-toggle-incoming { animation: none; opacity: 1; transform: none; }
 }

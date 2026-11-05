@@ -48,14 +48,14 @@ export default function GalleryInspection({
             {artwork.location}, {artwork.year}
           </p>
           <nav className="inspection-mobile-controls" aria-label={t("Commandes de la galerie", "Gallery controls")}>
+            <button onClick={onToggleImmersive} aria-pressed={immersive} aria-label={immersive ? t("Quitter le mode immersif", "Exit immersive view") : t("Passer en mode immersif", "Enter immersive view")}>
+              {immersive ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+            </button>
             <button onClick={() => onMove(-1)} aria-label={t("Œuvre précédente dans la galerie", "Previous work in the room")}>
               <ArrowLeft size={17} aria-hidden="true" />
             </button>
             <button onClick={() => onMove(1)} aria-label={t("Œuvre suivante dans la galerie", "Next work in the room")}>
               <ArrowRight size={17} aria-hidden="true" />
-            </button>
-            <button onClick={onToggleImmersive} aria-pressed={immersive} aria-label={immersive ? t("Quitter le mode immersif", "Exit immersive view") : t("Passer en mode immersif", "Enter immersive view")}>
-              {immersive ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
             </button>
           </nav>
         </div>
@@ -91,6 +91,9 @@ export default function GalleryInspection({
         className="inspection-navigation"
         aria-label={t("Explorer les photographies de la galerie", "Explore photographs in the room")}
       >
+        <button onClick={onToggleImmersive} aria-pressed={immersive} aria-label={immersive ? t("Quitter le mode immersif", "Exit immersive view") : t("Passer en mode immersif", "Enter immersive view")}>
+          {immersive ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+        </button>
         <button
           onClick={() => onMove(-1)}
           aria-label={t("Œuvre précédente dans la galerie", "Previous work in the room")}

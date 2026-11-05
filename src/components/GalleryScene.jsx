@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { bindGalleryPinch } from './galleryPinch.js';
 import { bindGalleryTouch } from './galleryTouch.js';
+import { createGalleryThemeTransition } from './galleryTheme.js';
 import { useLanguage } from '../i18n.jsx';
 import { localizeArtwork } from '../data/translations.js';
 
@@ -33,17 +34,17 @@ function stoneTexture() {
   return texture;
 }
 
-function labelTexture(artwork) {
+function labelTexture(artwork, light = false) {
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 220;
   const context = canvas.getContext('2d');
-  context.fillStyle = '#363632';
+  context.fillStyle = light ? '#e8e9e4' : '#363632';
   context.fillRect(0, 0, 512, 220);
-  context.fillStyle = '#dbd8d1';
+  context.fillStyle = light ? '#252923' : '#dbd8d1';
   context.font = '25px Arial, sans-serif';
   context.fillText(artwork.artist, 22, 53, 465);
-  context.fillStyle = '#a4a199';
+  context.fillStyle = light ? '#5a6156' : '#a4a199';
   context.font = '23px Arial, sans-serif';
   context.fillText(`${artwork.year} · ${artwork.location}`, 22, 98, 465);
   context.font = '22px Arial, sans-serif';
@@ -53,14 +54,14 @@ function labelTexture(artwork) {
   return texture;
 }
 
-export default function GalleryScene({ artworks = [], activeIndex = 0, navigationId = 0, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused = false, inspecting = false, reducedMotion = false }) {
+export default function GalleryScene({ artworks = [], activeIndex = 0, navigationId = 0, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused = false, inspecting = false, reducedMotion = false, theme = 'dark' }) {
   const { language, t } = useLanguage();
   const hostRef = useRef(null);
   const controlsRef = useRef(null);
   const invalidateRef = useRef(() => {});
   const [failed, setFailed] = useState(false);
   const [compactFallback, setCompactFallback] = useState(false);
-  controlsRef.current = { language, t, activeIndex, navigationId, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused, inspecting, reducedMotion };
+  controlsRef.current = { language, t, activeIndex, navigationId, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused, inspecting, reducedMotion, theme };
 
   useEffect(() => {
     const host = hostRef.current;
@@ -135,7 +136,28 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     const frameMaterial = new THREE.MeshStandardMaterial({ color: '#080909', roughness: 0.52, metalness: 0.3 });
     const matteMaterial = new THREE.MeshStandardMaterial({ color: '#eeece5', roughness: 1 });
     const fixtureMaterial = new THREE.MeshStandardMaterial({ color: '#3b3e38', roughness: 0.56, metalness: 0.3, emissive: '#30332e', emissiveIntensity: 0.2 });
+    const trimMaterial = fixtureMaterial.clone();
     const lensMaterial = new THREE.MeshBasicMaterial({ color: '#fff2d8', toneMapped: false });
+    const themeTransition = createGalleryThemeTransition(controlsRef.current.theme);
+    let renderedThemeAmount = -1;
+    const darkBackground = new THREE.Color('#101111');
+    const lightBackground = new THREE.Color('#f4f4f1');
+    // Surface emission gives the room a white exhibition finish without
+    // changing the lighting, exposure, frames, mats, or photograph materials.
+    const themedSurfaces = [
+      { material: wallMaterial, color: '#f7f7f4', emissive: '#ffffff', intensity: 1.6 },
+      { material: floorMaterial, color: '#d8dad5', emissive: '#d3d6cf', intensity: 0.8 },
+      { material: ceilingMaterial, color: '#e8e9e7', emissive: '#ffffff', intensity: 1.1 },
+      { material: trimMaterial, color: '#d3d6cf', emissive: '#d3d6cf', intensity: 0.9 },
+    ].map(({ material, color, emissive, intensity }) => ({
+      material,
+      darkColor: material.color.clone(),
+      lightColor: new THREE.Color(color),
+      darkEmissive: material.emissive.clone(),
+      lightEmissive: new THREE.Color(emissive),
+      darkIntensity: material.emissiveIntensity,
+      lightIntensity: intensity,
+    }));
 
     function box(parent, width, height, depth, material, x, y, z, castShadow = false) {
       const object = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
@@ -154,6 +176,8 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     ceiling.position.y = 6.28;
     scene.add(ceiling);
     const seamMaterial = new THREE.LineBasicMaterial({ color: '#171917', transparent: true, opacity: 0.7 });
+    const darkSeam = seamMaterial.color.clone();
+    const lightSeam = new THREE.Color('#afb4a9');
     for (let i = 0; i < count; i += 1) {
       const angle = TAU * i / count;
       const points = [new THREE.Vector3(0, 0.004, 0), new THREE.Vector3(Math.sin(angle) * ROOM_RADIUS, 0.004, -Math.cos(angle) * ROOM_RADIUS)];
@@ -173,9 +197,9 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       bay.rotation.y = -angle;
       scene.add(bay);
       box(bay, wallWidth, 6.2, 0.3, wallMaterial, 0, 3.1, -0.15);
-      box(bay, wallWidth, 0.08, 0.04, fixtureMaterial, 0, 0.045, 0.025);
+      box(bay, wallWidth, 0.08, 0.04, trimMaterial, 0, 0.045, 0.025);
       // Slim vertical reveals make the changes in wall angle legible in the low light.
-      box(bay, 0.045, 6.2, 0.055, fixtureMaterial, -wallWidth / 2 + 0.035, 3.1, 0.03);
+      box(bay, 0.045, 6.2, 0.055, trimMaterial, -wallWidth / 2 + 0.035, 3.1, 0.03);
       const artwork = artworks[i];
       if (!artwork) continue;
       const aspect = Number(artwork.aspectRatio) || 1.5;
@@ -210,11 +234,17 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         }, undefined, resolve);
       }));
       const labelMap = labelTexture(localizeArtwork(artwork, renderedLanguage));
+      const lightLabelMap = labelTexture(localizeArtwork(artwork, renderedLanguage), true);
       textures.add(labelMap);
+      textures.add(lightLabelMap);
       const label = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 0.275), new THREE.MeshBasicMaterial({ map: labelMap, toneMapped: false }));
       label.position.set(outerWidth / 2 + 0.5, 1.2, 0.015);
+      const lightLabel = new THREE.Mesh(label.geometry, new THREE.MeshBasicMaterial({ map: lightLabelMap, toneMapped: false, transparent: true, opacity: 0, depthWrite: false }));
+      lightLabel.position.z = 0.001;
+      lightLabel.visible = false;
+      label.add(lightLabel);
       bay.add(label);
-      wallLabels.push({ artworkIndex: i, material: label.material });
+      wallLabels.push({ artworkIndex: i, material: label.material, lightLabel });
       box(bay, 1.5, 0.035, 0.045, fixtureMaterial, 0, 5.98, 3.0);
       box(bay, 0.035, 0.25, 0.035, fixtureMaterial, 0, 5.87, 3.0);
       const fixture = new THREE.Group();
@@ -423,16 +453,37 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       const delta = Math.min((time - lastTime) / 1000, 0.08);
       lastTime = time;
       const current = controlsRef.current;
+      const roomTheme = themeTransition.update(current.theme, time, current.reducedMotion || document.hidden);
+      if (roomTheme.value !== renderedThemeAmount) {
+        const amount = roomTheme.value;
+        scene.background.lerpColors(darkBackground, lightBackground, amount);
+        scene.fog.color.copy(scene.background);
+        for (const surface of themedSurfaces) {
+          surface.material.color.lerpColors(surface.darkColor, surface.lightColor, amount);
+          surface.material.emissive.lerpColors(surface.darkEmissive, surface.lightEmissive, amount);
+          surface.material.emissiveIntensity = THREE.MathUtils.lerp(surface.darkIntensity, surface.lightIntensity, amount);
+        }
+        seamMaterial.color.lerpColors(darkSeam, lightSeam, amount);
+        seamMaterial.opacity = THREE.MathUtils.lerp(0.7, 0.35, amount);
+        for (const label of wallLabels) {
+          label.lightLabel.material.opacity = amount;
+          label.lightLabel.visible = amount > 0;
+        }
+        renderedThemeAmount = amount;
+      }
       if (current.language !== renderedLanguage) {
         // Replace only text maps; retain the room, camera, free yaw, and interaction state.
         for (const label of wallLabels) {
-          const oldTexture = label.material.map;
-          const texture = labelTexture(localizeArtwork(artworks[label.artworkIndex], current.language));
-          textures.add(texture);
-          label.material.map = texture;
-          label.material.needsUpdate = true;
-          textures.delete(oldTexture);
-          oldTexture.dispose();
+          const artwork = localizeArtwork(artworks[label.artworkIndex], current.language);
+          for (const [material, light] of [[label.material, false], [label.lightLabel.material, true]]) {
+            const oldTexture = material.map;
+            const texture = labelTexture(artwork, light);
+            textures.add(texture);
+            material.map = texture;
+            material.needsUpdate = true;
+            textures.delete(oldTexture);
+            oldTexture.dispose();
+          }
         }
         renderedLanguage = current.language;
       }
@@ -521,11 +572,11 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
           : current.t('se trouve à gauche des informations sur l’œuvre', 'is on the left beside the artwork information')
         : current.t('se trouve devant vous', 'is ahead');
       renderer.domElement.setAttribute('aria-label', current.t(
-        `Galerie immersive à l’éclairage tamisé. ${viewed.artist}, ${viewed.year}, ${placement}. Sur écran tactile, balayez vers la gauche ou la droite pour changer de photographie. Avec la souris, faites glisser pour tourner à 360 degrés. Les commandes de navigation sont également disponibles.`,
-        `Dark museum gallery. ${viewed.artist}, ${viewed.year}, ${placement}. On a touchscreen, swipe left or right to change photographs. With a mouse, drag to turn 360 degrees. Photograph navigation controls are also available.`,
+        `${current.theme === 'light' ? 'Galerie immersive aux murs blancs' : 'Galerie immersive à l’éclairage tamisé'}. ${viewed.artist}, ${viewed.year}, ${placement}. Sur écran tactile, balayez vers la gauche ou la droite pour changer de photographie. Avec la souris, faites glisser pour tourner à 360 degrés. Les commandes de navigation sont également disponibles.`,
+        `${current.theme === 'light' ? 'White-walled museum gallery' : 'Dark museum gallery'}. ${viewed.artist}, ${viewed.year}, ${placement}. On a touchscreen, swipe left or right to change photographs. With a mouse, drag to turn 360 degrees. Photograph navigation controls are also available.`,
       ));
       renderer.render(scene, camera);
-      if (Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
+      if (roomTheme.active || Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
     }
     function visibilityChange() {
       if (document.hidden && frame !== null) { cancelAnimationFrame(frame); frame = null; }
@@ -592,14 +643,14 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     return () => { unbindPinch(); touch.cleanup(); };
   }, [failed]);
 
-  useEffect(() => { invalidateRef.current(true); }, [activeIndex, navigationId, focused, inspecting, reducedMotion, language]);
+  useEffect(() => { invalidateRef.current(true); }, [activeIndex, navigationId, focused, inspecting, reducedMotion, language, theme]);
   const baseSelected = artworks[clamp(activeIndex, 0, Math.max(artworks.length - 1, 0))];
   const selected = baseSelected ? localizeArtwork(baseSelected, language) : undefined;
   const fallbackBounds = inspecting
     ? compactFallback ? { left: '5%', top: '5.5%', width: '90%', height: '37%' } : { left: '7%', top: '13.5%', width: '50%', height: '73%' }
     : { left: '5%', top: '12.5%', width: '90%', height: '75%' };
   return <div ref={hostRef} className="gallery-scene" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}>
-    {failed && selected && <div onClick={(event) => { if (inspecting && event.target === event.currentTarget) onBackgroundClick?.(); }} style={{ position: 'absolute', inset: 0, background: '#171817', cursor: inspecting ? 'zoom-out' : 'default' }}>
+    {failed && selected && <div onClick={(event) => { if (inspecting && event.target === event.currentTarget) onBackgroundClick?.(); }} style={{ position: 'absolute', inset: 0, background: theme === 'light' ? '#f4f4f1' : '#171817', transition: reducedMotion ? 'none' : 'background-color 650ms ease', cursor: inspecting ? 'zoom-out' : 'default' }}>
       <button type="button" onClick={(event) => { if (!inspecting) onSelect?.(activeIndex); else if (event.detail > 0 && event.target === event.currentTarget) onBackgroundClick?.(); }} aria-label={t(`Voir ${selected.title}`, `View ${selected.title}`)} style={{ position: 'absolute', ...fallbackBounds, display: 'grid', placeItems: 'center', border: 0, padding: 0, background: 'transparent', cursor: inspecting ? 'default' : 'pointer', transition: reducedMotion ? 'none' : 'left 700ms ease, top 700ms ease, width 700ms ease, height 700ms ease' }}>
         <img src={selected.image} alt={selected.title} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', boxSizing: 'border-box', objectFit: 'contain', display: 'block', border: '6px solid #080909', padding: 20, background: '#e7e4dc', boxShadow: '0 0 70px #fff1c51f' }} />
       </button>

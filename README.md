@@ -35,8 +35,8 @@ vercel deploy --prod --scope timetospammyline-7173s-projects
 
 ## Experience
 
-- French is the default on every fresh page load. The FR/EN control switches the interface, artwork descriptions, photographer biography, print controls, accessibility labels, and inquiry templates without leaving the current view. Separate inquiry messages and subjects preserve edits in each language.
-- A dark, hexagonal 3D museum room with six framed photographs, individual spotlights, and smooth camera navigation.
+- French is the default on every fresh page load. The French/US flag control switches languages through a brief spinning globe animation, updating interface text, artwork descriptions, photographer biographies, print controls, accessibility labels, and inquiry templates without leaving the current view. Separate inquiry messages and subjects preserve edits in each language.
+- A hexagonal 3D museum room with six framed photographs, individual spotlights, and smooth camera navigation. The moon/sun control animates between dark and white surroundings while preserving the photographs’ lighting, colors, and camera position. Dark mode is the default; both controls remain available in immersive view.
 - Click a photograph or its museum label to approach it in the room. Its physical frame stays in 3D on the left, with the story, photographer, edition, paper, and dimensions alongside it. On phones, the wall label sits below the work.
 - “Explore the print” opens a separate studio view with front, left, and right frame perspectives. The angled frame is a visualization, not additional product photography.
 - Choose “A closer look” in the studio view, then drag the enlarged photograph to inspect its details. The focused image also supports arrow-key panning. Closing the studio returns to the same place in the room.
@@ -47,7 +47,7 @@ vercel deploy --prod --scope timetospammyline-7173s-projects
 - Pinch to approach a photograph or pull back to the room. Scrolling down over the gallery approaches the work; scrolling up returns to the room. The artwork information panel keeps its normal scrolling.
 - Two-finger horizontal trackpad scrolling moves to the previous or next photograph, using the same transition as the keyboard arrows. Each gesture advances once, including its momentum, and keeps the focused view open when inspecting a work.
 - All five photographers’ portraits and credits open dedicated profiles: Willy Vainqueur, Denis Rouvre, Cyril Villemain, David Dahan, and Romain Bourven. Routes use `#/photographers/` followed by the photographer’s slug (for example, `david-dahan` or `romain-bourven`), with sourced text in French and English and their gallery work. Browser Back and the page’s back action restore the previous viewing context.
-- “Step closer” and immersive view.
+- “Step closer” and immersive view. The expand/restore button sits first in the artwork navigation controls, including on phones.
 - Accessible collection grid, responsive artwork dialogs, and reduced motion support.
 - A full-screen inquiry composer with editable message, subject, signature, and a clipped photograph of the selected work. It opens a prefilled draft in the visitor’s email app; the visitor reviews and sends it there. A copy action provides a fallback. No messages are sent automatically.
 - WebGL fallback and rendering only when the scene changes.

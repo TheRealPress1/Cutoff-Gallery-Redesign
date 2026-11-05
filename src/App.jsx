@@ -16,11 +16,13 @@ import PrintViewer from "./components/PrintViewer.jsx";
 import PhotographerCredit from "./components/PhotographerCredit.jsx";
 import PhotographerProfile from "./components/PhotographerProfile.jsx";
 import LanguageToggle from "./components/LanguageToggle.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 import { useLanguage } from "./i18n.jsx";
 import { artworks } from "./data/artworks.js";
 import InquiryComposer from "./components/InquiryComposer.jsx";
 import { photographers } from "./data/photographers.js";
 import { localizeArtwork, localizePhotographer } from "./data/translations.js";
+import "./museum-theme.css";
 
 const readPhotographerRoute = () => {
   const prefix = "#/photographers/";
@@ -214,6 +216,7 @@ export default function App() {
   const [focused, setFocused] = useState(false);
   const [inspecting, setInspecting] = useState(false);
   const [immersive, setImmersive] = useState(false);
+  const [museumTheme, setMuseumTheme] = useState("dark");
   const [approaching, setApproaching] = useState(false);
   const approachTimer = useRef(null);
   const museumLabel = useRef(null);
@@ -447,6 +450,7 @@ export default function App() {
     <>
     <div
       className={`site-shell ${view === "gallery" ? "museum-mode" : "collection-mode"} ${immersive ? "immersive-mode" : ""} ${approaching ? "approaching-artwork" : ""} ${inspecting ? "inspecting-artwork" : ""}`}
+      data-theme={museumTheme}
       inert={Boolean(photographer)}
       aria-hidden={photographer ? true : undefined}
     >
@@ -485,7 +489,7 @@ export default function App() {
             About
           </button>
         </nav>
-        <LanguageToggle />
+        {view !== "gallery" && <LanguageToggle />}
       </header>
       <main>
         {view === "collection" && (
@@ -518,6 +522,7 @@ export default function App() {
                 focused={focused}
                 inspecting={inspecting}
                 reducedMotion={reducedMotion}
+                theme={museumTheme}
               />
               {inspecting && (
                 <GalleryInspection
@@ -539,16 +544,10 @@ export default function App() {
                   </h1>
                 </div>
               </div>
-              <button
-                className="icon-button gallery-expand"
-                onClick={() => setImmersive((expanded) => !expanded)}
-                aria-pressed={immersive}
-                aria-label={
-                  immersive ? t("Quitter le mode immersif", "Exit immersive view") : t("Passer en mode immersif", "Enter immersive view")
-                }
-              >
-                {immersive ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-              </button>
+              <div className="gallery-appearance" role="group" aria-label={t("Ambiance et langue", "Gallery appearance and language")}>
+                <ThemeToggle theme={museumTheme} onToggle={() => setMuseumTheme((current) => current === "dark" ? "light" : "dark")} />
+                <LanguageToggle />
+              </div>
               {!ready && (
                 <div className="gallery-loading">
                   <span className="loading-circle" />
@@ -575,6 +574,14 @@ export default function App() {
                   {t("Faites glisser pour explorer à 360°", "Drag to explore 360°")}<span>·</span>{t("Choisissez une photographie", "Select a photograph")}
                 </p>
                 <div className="museum-controls">
+                  <button
+                    className="icon-button gallery-fullscreen"
+                    onClick={() => setImmersive((expanded) => !expanded)}
+                    aria-pressed={immersive}
+                    aria-label={immersive ? t("Quitter le mode immersif", "Exit immersive view") : t("Passer en mode immersif", "Enter immersive view")}
+                  >
+                    {immersive ? <Minimize2 size={17} aria-hidden="true" /> : <Maximize2 size={17} aria-hidden="true" />}
+                  </button>
                   <button
                     className={`perspective-button ${focused ? "is-active" : ""}`}
                     onClick={() => openWork(viewedIndex)}
