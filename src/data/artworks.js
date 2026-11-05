@@ -54,6 +54,7 @@ export const artworks = [
     title: "Mehdi, Pedro, Thomas & friends",
     artist: "DJ Mehdi & friends",
     photographer: "Romain Bourven",
+    photographerId: "romain-bourven",
     year: 2011,
     location: "Social Club, Paris",
     description:
@@ -124,6 +125,7 @@ export const artworks = [
     title: "Phoenix — Aix-les-Bains",
     artist: "Phoenix",
     photographer: "David Dahan",
+    photographerId: "david-dahan",
     year: 2023,
     location: "Aix-les-Bains, France",
     description:

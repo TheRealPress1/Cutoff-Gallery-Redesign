@@ -48,6 +48,40 @@ const formatFrench = {
 };
 
 const photographerFrench = {
+  "david-dahan": {
+    portraitAlt: "David Dahan assis, en chemise blanche et gilet gris",
+    headline: "Le concert, suspendu dans l’image.",
+    intro:
+      "David Dahan photographie Phoenix à Musilac, à Aix-les-Bains, en 2023. Présentée chez Cut Off Gallery, cette image prolonge un instant de musique au-delà de la scène.",
+    bio: [
+      "Sa photographie de Phoenix est proposée sur papier d’art Hahnemühle en coton. Chaque tirage est titré, numéroté et signé par le photographe : l’image devient une œuvre à part entière dans la collection.",
+    ],
+    facts: [
+      { label: "Dans la collection", value: "Phoenix" },
+      { label: "Lieu", value: "Musilac · Aix-les-Bains" },
+      { label: "Année", value: "2023" },
+    ],
+    sourceLabels: ["Cut Off Gallery — Phoenix, Aix-les-Bains"],
+  },
+  "romain-bourven": {
+    portraitAlt: "Romain Bourven en veste dorée devant un bâtiment à la façade miroir",
+    headline: "Au cœur de l’énergie nocturne.",
+    intro:
+      "De la piste de danse à la course à pied, Romain Bourven photographie les corps en mouvement. Ses images de la scène électronique parisienne gardent la trace des rencontres et de l’énergie collective autour de la musique.",
+    bio: [
+      "Né en 1977, il apprend le tirage noir et blanc à treize ans et commence par photographier le skateboard. Installé à Paris en 2006, il documente la musique électronique et devient notamment photographe du Social Club.",
+      "Son image de DJ Mehdi et de ses amis saisit l’anniversaire du club en 2011. Il se tourne ensuite vers la course à pied et le trail, poursuivant son exploration du mouvement par la photographie.",
+    ],
+    facts: [
+      { label: "Né en", value: "1977" },
+      { label: "Pratique", value: "Musique · Sport" },
+      { label: "Dans la collection", value: "Social Club, Paris · 2011" },
+    ],
+    sourceLabels: [
+      "Cut Off Gallery — biographie et entretien",
+      "Technikart — entretien avec Romain Bourven",
+    ],
+  },
   "cyril-villemain": {
     portraitAlt: "Cyril Villemain en chemise blanche chez Bahari",
     headline: "Dans la cabine, avant les casques.",

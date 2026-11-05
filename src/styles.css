@@ -951,6 +951,18 @@ a {
   position: relative;
   z-index: 5;
 }
+@media (min-width: 761px) {
+  .site-header {
+    justify-content: flex-start;
+    gap: clamp(24px, 3vw, 48px);
+  }
+  .site-header nav {
+    margin-left: 0;
+  }
+  .site-header > .language-toggle {
+    margin-left: auto;
+  }
+}
 .museum-mode {
   --site-header-height: 82px;
   height: 100dvh;

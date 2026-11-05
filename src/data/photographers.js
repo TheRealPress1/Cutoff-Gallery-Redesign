@@ -1,6 +1,61 @@
 // Original profile copy, verified against the interviews and institutional
 // biographies linked below. Portrait credit follows the publisher's metadata.
 export const photographers = {
+  "david-dahan": {
+    id: "david-dahan",
+    name: "David Dahan",
+    portrait: "/photographers/david-dahan.jpg",
+    portraitAlt: "David Dahan seated, wearing a white shirt and grey waistcoat",
+    avatarScale: 1.6,
+    avatarPosition: "50% 0%",
+    headline: "The concert, held in a frame.",
+    intro:
+      "David Dahan photographs Phoenix at Musilac in Aix-les-Bains in 2023. Presented at Cut Off Gallery, this image preserves a moment of live music beyond the stage.",
+    bio: [
+      "His photograph of Phoenix is offered as a fine art print on Hahnemühle cotton paper. Each print is titled, numbered and signed by the photographer, bringing his image into the collection as a physical work.",
+    ],
+    facts: [
+      { label: "In the collection", value: "Phoenix" },
+      { label: "Place", value: "Musilac · Aix-les-Bains" },
+      { label: "Year", value: "2023" },
+    ],
+    sources: [
+      {
+        label: "Cut Off Gallery — Phoenix, Aix-les-Bains",
+        url: "https://cutoffgallery.art/collection/phoenix-aix-les-bains-2023",
+      },
+    ],
+  },
+  "romain-bourven": {
+    id: "romain-bourven",
+    name: "Romain Bourven",
+    portrait: "/photographers/romain-bourven.jpg",
+    portraitAlt: "Romain Bourven in a gold jacket in front of a mirrored building",
+    avatarScale: 1.5,
+    avatarPosition: "60% 0%",
+    headline: "Inside the energy of the night.",
+    intro:
+      "From the dance floor to the running track, Romain Bourven photographs bodies in motion. His images of the Paris electronic scene preserve the encounters and shared energy around the music.",
+    bio: [
+      "Born in 1977, he learned black-and-white printing at thirteen and began photographing skateboarders. After moving to Paris in 2006, he documented electronic music, becoming a photographer at the Social Club.",
+      "His photograph of DJ Mehdi and friends captures the club’s anniversary in 2011. He later turned his attention to running and trail running, continuing to explore movement through photography.",
+    ],
+    facts: [
+      { label: "Born", value: "1977" },
+      { label: "Practice", value: "Music · Sport" },
+      { label: "In the collection", value: "Social Club, Paris · 2011" },
+    ],
+    sources: [
+      {
+        label: "Cut Off Gallery — biography & interview",
+        url: "https://cutoffgallery.art/collection/mehdi-pedro-thomas-friends-paris-2011",
+      },
+      {
+        label: "Technikart — interview with Romain Bourven",
+        url: "https://www.technikart.com/dinterieur-nuit-a-exterieur-jour-les-deux-visages-du-photographe-romain-bourven/",
+      },
+    ],
+  },
   "cyril-villemain": {
     id: "cyril-villemain",
     name: "Cyril Villemain",
