@@ -64,7 +64,7 @@ const photographerFrench = {
     sourceLabels: ["Cut Off Gallery — Phoenix, Aix-les-Bains"],
   },
   "romain-bourven": {
-    portraitAlt: "Romain Bourven en veste dorée devant un bâtiment à la façade miroir",
+    portraitAlt: "Romain Bourven vêtu de gris, appuyé contre une rambarde devant un bâtiment vitré",
     headline: "Au cœur de l’énergie nocturne.",
     intro:
       "De la piste de danse à la course à pied, Romain Bourven photographie les corps en mouvement. Ses images de la scène électronique parisienne gardent la trace des rencontres et de l’énergie collective autour de la musique.",

@@ -29,10 +29,10 @@ export const photographers = {
   "romain-bourven": {
     id: "romain-bourven",
     name: "Romain Bourven",
-    portrait: "/photographers/romain-bourven.jpg",
-    portraitAlt: "Romain Bourven in a gold jacket in front of a mirrored building",
-    avatarScale: 1.5,
-    avatarPosition: "60% 0%",
+    portrait: "/photographers/romain-bourven-portrait.jpg",
+    portraitAlt: "Romain Bourven in grey, leaning against a railing outside a glass building",
+    avatarScale: 1.9,
+    avatarPosition: "50% 0%",
     headline: "Inside the energy of the night.",
     intro:
       "From the dance floor to the running track, Romain Bourven photographs bodies in motion. His images of the Paris electronic scene preserve the encounters and shared energy around the music.",
