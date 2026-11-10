@@ -52,7 +52,7 @@ export const artworks = [
   {
     id: "mehdi-and-friends",
     title: "Mehdi, Pedro, Thomas & friends",
-    artist: "DJ Mehdi & friends",
+    artist: "DJ Medhi and friend",
     photographer: "Romain Bourven",
     photographerId: "romain-bourven",
     year: 2011,

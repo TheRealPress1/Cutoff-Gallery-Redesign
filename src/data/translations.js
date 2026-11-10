@@ -12,7 +12,7 @@ const artworkFrench = {
   },
   "mehdi-and-friends": {
     title: "Mehdi, Pedro, Thomas et leurs amis",
-    artist: "DJ Mehdi et ses amis",
+    artist: "DJ Medhi and friend",
     description:
       "Une nuit électrique au Social Club. Romain Bourven saisit DJ Mehdi et la bande d’Ed Banger dans un moment spontané derrière les platines, où l’amitié et la musique occupent tout le cadre.",
   },
