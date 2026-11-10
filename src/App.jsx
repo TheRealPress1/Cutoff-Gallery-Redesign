@@ -559,13 +559,6 @@ export default function App() {
                   onToggleImmersive={() => setImmersive((expanded) => !expanded)}
                 />
               )}
-              <div className="gallery-topbar">
-                <div className="exhibition-title">
-                  <h1>
-                    {t("Le son", "Sound")}<span>.</span> {t("L’instant", "Still")}<span>.</span>
-                  </h1>
-                </div>
-              </div>
               {!ready && (
                 <div className="gallery-loading">
                   <span className="loading-circle" />
