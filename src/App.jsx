@@ -16,6 +16,7 @@ import PrintViewer from "./components/PrintViewer.jsx";
 import PhotographerCredit from "./components/PhotographerCredit.jsx";
 import PhotographerProfile from "./components/PhotographerProfile.jsx";
 import AppearanceControls from "./components/AppearanceControls.jsx";
+import SlidingNavigation from "./components/SlidingNavigation.jsx";
 import { useLanguage } from "./i18n.jsx";
 import { useTheme } from "./theme.jsx";
 import { artworks } from "./data/artworks.js";
@@ -458,6 +459,7 @@ export default function App() {
     setImmersive(false);
     select(0);
   };
+  const activeNavigation = modal === "about" ? "about" : view;
   return (
     <>
     <div
@@ -468,9 +470,10 @@ export default function App() {
     >
       <header className="site-header" inert={immersive} aria-hidden={immersive || undefined}>
         <Brand onClick={goHome} />
-        <nav aria-label={t("Navigation principale", "Main navigation")}>
+        <SlidingNavigation activeItem={activeNavigation}>
           <button
-            className={view === "gallery" ? "nav-link active" : "nav-link"}
+            className={activeNavigation === "gallery" ? "nav-link active" : "nav-link"}
+            aria-current={activeNavigation === "gallery" ? "page" : undefined}
             onClick={() => {
               cancelApproach();
               setView("gallery");
@@ -481,7 +484,8 @@ export default function App() {
             {t("La galerie", "The gallery")}
           </button>
           <button
-            className={view === "collection" ? "nav-link active" : "nav-link"}
+            className={activeNavigation === "collection" ? "nav-link active" : "nav-link"}
+            aria-current={activeNavigation === "collection" ? "page" : undefined}
             onClick={() => {
               cancelApproach();
               setView("collection");
@@ -492,7 +496,8 @@ export default function App() {
             {t("La collection", "The collection")}
           </button>
           <button
-            className="nav-link"
+            className={activeNavigation === "about" ? "nav-link active" : "nav-link"}
+            aria-current={activeNavigation === "about" ? "page" : undefined}
             onClick={() => {
               cancelApproach();
               setModal("about");
@@ -500,7 +505,7 @@ export default function App() {
           >
             About
           </button>
-        </nav>
+        </SlidingNavigation>
         <AppearanceControls />
       </header>
       <main>
