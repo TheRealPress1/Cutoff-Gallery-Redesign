@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import { bindGalleryPinch } from './galleryPinch.js';
 import { bindGalleryTouch } from './galleryTouch.js';
 import { createGalleryThemeTransition } from './galleryTheme.js';
@@ -7,6 +8,7 @@ import { createGalleryWoodTextures } from './galleryWood.js';
 import { DETAIL_SCALE, PHOTO_DEPTH, detailPanAtPoint, constrainDetailPan, panDetailByPixels } from './galleryDetail.js';
 import { useLanguage } from '../i18n.jsx';
 import { localizeArtwork } from '../data/translations.js';
+import './gallery-photo-zoom.css';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const TAU = Math.PI * 2;
@@ -59,6 +61,7 @@ function labelTexture(artwork, light = false) {
 export default function GalleryScene({ artworks = [], activeIndex = 0, navigationId = 0, onViewChange, onSelect, onNavigate, onBackgroundClick, onReady, focused = false, inspecting = false, approaching = false, detailZoom = false, onDetailZoomChange, reducedMotion = false, theme = 'dark' }) {
   const { language, t } = useLanguage();
   const hostRef = useRef(null);
+  const zoomButtonRef = useRef(null);
   const controlsRef = useRef(null);
   const invalidateRef = useRef(() => {});
   const [failed, setFailed] = useState(false);
@@ -323,6 +326,8 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     let detailPan = { x: 0, y: 0 };
     const detailViews = artworks.map(() => ({ crop: 1, pan: { x: 0, y: 0 } }));
     const lookAt = new THREE.Vector3();
+    const zoomCorner = new THREE.Vector3();
+    let hoverPointer = null;
 
     function resize() {
       const width = Math.max(1, host.clientWidth);
@@ -351,6 +356,28 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
       raycaster.setFromCamera(pointer, camera);
       return raycaster.intersectObjects(selectable, false);
+    }
+    function updateZoomControl() {
+      const button = zoomButtonRef.current;
+      const current = controlsRef.current;
+      if (!button) return;
+      if (!current.inspecting || current.approaching) {
+        button.dataset.positioned = 'false';
+        host.dataset.photoHovered = 'false';
+        return;
+      }
+      const size = dimensions[current.activeIndex];
+      const photo = photographs[current.activeIndex];
+      // Project the real photograph corner rather than estimating a viewport
+      // percentage. The button follows every print size and camera resize.
+      zoomCorner.set(size.imageWidth / 2, size.imageHeight / 2, 0);
+      photo.localToWorld(zoomCorner).project(camera);
+      const x = (zoomCorner.x + 1) * hostWidth / 2;
+      const y = (1 - zoomCorner.y) * hostHeight / 2;
+      button.style.transform = `translate3d(${x - 48}px, ${y + 8}px, 0)`;
+      button.dataset.positioned = String(zoomCorner.z > -1 && zoomCorner.z < 1);
+      const hit = hoverPointer ? hitsAt(hoverPointer)[0] : null;
+      host.dataset.photoHovered = String(hit?.object.userData.artworkIndex === current.activeIndex);
     }
     function facingArtworkIndex() {
       // Choose the work nearest the current gaze, including when the camera is
@@ -396,6 +423,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     }
     function pointerDown(event) {
       if (event.pointerType === 'touch' || event.button !== 0 || !event.isPrimary || dragging) return;
+      hoverPointer = { clientX: event.clientX, clientY: event.clientY };
       dragging = true;
       activePointer = event.pointerId;
       pointerStartedOnArtwork = controlsRef.current.inspecting && hitsAt(event).length > 0;
@@ -407,6 +435,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     }
     function pointerMove(event) {
       if (event.pointerType === 'touch') return;
+      hoverPointer = { clientX: event.clientX, clientY: event.clientY };
       if (dragging) {
         if (event.pointerId !== activePointer) return;
         const dx = event.clientX - lastPointerX;
@@ -441,7 +470,12 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         renderer.domElement.style.cursor = controlsRef.current.inspecting
           ? controlsRef.current.detailZoom ? 'grab' : hit?.object.userData.isPhotograph ? 'zoom-in' : overArtwork ? 'default' : 'zoom-out'
           : overArtwork ? 'pointer' : 'grab';
+        updateZoomControl();
       }
+    }
+    function pointerLeave() {
+      hoverPointer = null;
+      host.dataset.photoHovered = 'false';
     }
     function pointerUp(event) {
       if (event.pointerType === 'touch') return;
@@ -462,10 +496,13 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
     }
     renderer.domElement.addEventListener('pointerdown', pointerDown);
     renderer.domElement.addEventListener('pointermove', pointerMove);
+    renderer.domElement.addEventListener('pointerleave', pointerLeave);
     renderer.domElement.addEventListener('pointerup', pointerUp);
     renderer.domElement.addEventListener('pointercancel', pointerCancel);
     renderer.domElement.addEventListener('lostpointercapture', pointerCancel);
-    const touch = bindGalleryTouch(host, {
+    // Only the canvas participates in scene gestures; a tap on the overlaid
+    // magnifier must remain a single native button click.
+    const touch = bindGalleryTouch(renderer.domElement, {
       onStart: (event) => controlsRef.current.inspecting && hitsAt(event).length > 0,
       onTap: activateAt,
       isPanning: () => controlsRef.current.detailZoom && controlsRef.current.inspecting,
@@ -473,7 +510,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       onNavigate: (direction) => controlsRef.current.onNavigate?.(direction),
     });
     const unbindPinch = bindGalleryPinch(host.parentElement, {
-      isSceneTarget: (target) => host.contains(target),
+      isSceneTarget: (target) => renderer.domElement.contains(target),
       onStart: () => {
         touch.cancel();
         const pointerId = activePointer;
@@ -675,6 +712,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
         }
       });
       renderer.render(scene, camera);
+      updateZoomControl();
       if (roomTheme.active || detailAnimating || viewInspection !== targetInspection || Math.abs(angleDelta) > 0.0001 || Math.abs(yawDelta) > 0.0001 || Math.abs(targetDragY - dragY) > 0.0001 || Math.abs(targetDistance - viewDistance) > 0.0005 || Math.abs(targetShiftX - viewShiftX) > 0.0001 || Math.abs(targetShiftY - viewShiftY) > 0.0001) invalidate();
     }
     function visibilityChange() {
@@ -702,6 +740,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       touch.cleanup();
       renderer.domElement.removeEventListener('pointerdown', pointerDown);
       renderer.domElement.removeEventListener('pointermove', pointerMove);
+      renderer.domElement.removeEventListener('pointerleave', pointerLeave);
       renderer.domElement.removeEventListener('pointerup', pointerUp);
       renderer.domElement.removeEventListener('pointercancel', pointerCancel);
       renderer.domElement.removeEventListener('lostpointercapture', pointerCancel);
@@ -718,6 +757,7 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
       textures.forEach((texture) => texture.dispose());
       renderer.dispose();
       renderer.domElement.remove();
+      delete host.dataset.photoHovered;
     };
   }, [artworks]);
 
@@ -749,7 +789,20 @@ export default function GalleryScene({ artworks = [], activeIndex = 0, navigatio
   const fallbackBounds = inspecting
     ? compactFallback ? { left: '5%', top: '5.5%', width: '90%', height: '37%' } : { left: '7%', top: '13.5%', width: '50%', height: '73%' }
     : { left: '5%', top: '12.5%', width: '90%', height: '75%' };
-  return <div ref={hostRef} className="gallery-scene" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: detailZoom ? 'none' : 'pan-y' }}>
+  return <div ref={hostRef} className="gallery-scene" data-detail-zoom={detailZoom} style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: detailZoom ? 'none' : 'pan-y' }}>
+    {!failed && inspecting && <button
+      ref={zoomButtonRef}
+      type="button"
+      className="gallery-photo-zoom"
+      data-positioned="false"
+      aria-label={detailZoom ? t('Vue entière', 'Full view') : t('Examiner les détails', 'Examine the details')}
+      aria-pressed={detailZoom}
+      aria-hidden={approaching || undefined}
+      disabled={approaching}
+      onClick={() => onDetailZoomChange?.(!detailZoom)}
+    >
+      {detailZoom ? <ZoomOut size={18} strokeWidth={1.6} aria-hidden="true" /> : <ZoomIn size={18} strokeWidth={1.6} aria-hidden="true" />}
+    </button>}
     {failed && selected && <div onClick={(event) => { if (inspecting && event.target === event.currentTarget) onBackgroundClick?.(); }} style={{ position: 'absolute', inset: 0, background: theme === 'light' ? '#e4dfd4' : '#171817', transition: reducedMotion ? 'none' : 'background-color 650ms ease', cursor: inspecting ? 'zoom-out' : 'default' }}>
       <button type="button" onClick={(event) => { if (!inspecting) onSelect?.(activeIndex); else if (event.detail > 0 && event.target === event.currentTarget) onBackgroundClick?.(); }} aria-label={t(`Voir ${selected.title}`, `View ${selected.title}`)} style={{ position: 'absolute', ...fallbackBounds, display: 'grid', placeItems: 'center', border: 0, padding: 0, background: 'transparent', cursor: inspecting ? 'default' : 'pointer', transition: reducedMotion ? 'none' : 'left 700ms ease, top 700ms ease, width 700ms ease, height 700ms ease' }}>
         <img src={selected.image} alt={selected.title} style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', boxSizing: 'border-box', objectFit: 'contain', display: 'block', border: '6px solid #080909', padding: 20, background: '#e7e4dc', boxShadow: '0 0 70px #fff1c51f' }} />

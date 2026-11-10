@@ -38,51 +38,6 @@
 .inspection-back:hover {
   color: #fff;
 }
-.inspection-detail-controls {
-  position: absolute;
-  bottom: 24px;
-  left: 38%;
-  transform: translateX(-50%);
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  pointer-events: auto;
-  color: #e8e7df;
-  transition: opacity 0.4s ease;
-}
-.inspection-detail-controls button {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 40px;
-  padding: 0 16px;
-  border: 1px solid #a1ab934d;
-  border-radius: 24px;
-  background: #171b17ed;
-  font-size: 11px;
-  white-space: nowrap;
-}
-.inspection-detail-controls button:hover {
-  background: #323a2f;
-}
-.inspection-detail-controls button:focus-visible {
-  outline: 2px solid #c7aa7c;
-  outline-offset: 4px;
-}
-.inspection-detail-controls > span {
-  font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 12px;
-  background: #171b17d9;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.gallery-inspection.is-arriving .inspection-detail-controls {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: none;
-}
 .inspection-panel {
   position: absolute;
   right: 5%;
@@ -228,20 +183,6 @@
   }
 }
 @media (max-width: 760px) {
-  .inspection-detail-controls {
-    top: 8px;
-    right: 12px;
-    bottom: auto;
-    left: auto;
-    transform: none;
-  }
-  .inspection-detail-controls button {
-    font-size: 10px;
-    padding: 0 12px;
-  }
-  .inspection-detail-controls > span {
-    display: none;
-  }
   .inspecting-artwork .gallery-expand {
     display: none;
   }
@@ -357,7 +298,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .inspection-detail-controls,
   .gallery-inspection::before,
   .inspection-panel,
   .inspection-copy,

@@ -17,6 +17,7 @@ import PhotographerCredit from "./components/PhotographerCredit.jsx";
 import PhotographerProfile from "./components/PhotographerProfile.jsx";
 import AppearanceControls from "./components/AppearanceControls.jsx";
 import SlidingNavigation from "./components/SlidingNavigation.jsx";
+import AboutPage from "./components/AboutPage.jsx";
 import { useLanguage } from "./i18n.jsx";
 import { useTheme } from "./theme.jsx";
 import { artworks } from "./data/artworks.js";
@@ -24,6 +25,12 @@ import InquiryComposer from "./components/InquiryComposer.jsx";
 import { photographers } from "./data/photographers.js";
 import { localizeArtwork, localizePhotographer } from "./data/translations.js";
 import "./museum-theme.css";
+
+const readMainRoute = () => {
+  if (window.location.hash === "#/about") return "about";
+  if (window.location.hash === "#/collection") return "collection";
+  return "gallery";
+};
 
 const readPhotographerRoute = () => {
   const prefix = "#/photographers/";
@@ -173,39 +180,6 @@ function Inquiry({ artwork, onClose }) {
   );
 }
 
-function About({ onClose, onInquire }) {
-  const { language, t } = useLanguage();
-  const storyArtwork = localizeArtwork(artworks[0], language);
-  return (
-    <Modal onClose={onClose} className="story-modal" label={t("À propos de CutOff Gallery", "About CutOff Gallery")}>
-      <div className="story-image">
-        <img src={storyArtwork.image} alt={storyArtwork.title} />
-      </div>
-      <div className="story-copy">
-        <h2>
-          {t("À propos de CutOff Gallery", "About CutOff Gallery")}
-        </h2>
-        <p className="story-intro">
-          <strong>CutOff Gallery</strong>{" "}
-          {t("est un espace dédié à la photographie rare de la scène rap et électronique.", "is a space dedicated to rare photographs from the rap and electronic music scenes.")}
-        </p>
-        <p>
-          {t("Entre studio de création et galerie photo, CutOff “digge” dans les archives des photographes pour dénicher des clichés rares et puissants, ceux qui méritent d’être figés sur papier pour leur valeur artistique et historique.", "Part creative studio, part photography gallery, CutOff “digs” through photographers’ archives to uncover rare and powerful images, those that deserve to be preserved on paper for their artistic and historical value.")}
-        </p>
-        <p>
-          {t("Chaque tirage proposé naît d’une collaboration entre la galerie et le photographe. Les œuvres sélectionnées se doivent de capturer un instant authentique de création où la spontanéité prime sur la mise en scène.", "Every print we offer is born of a collaboration between the gallery and the photographer. The selected works must capture an authentic moment of creation, where spontaneity takes precedence over staging.")}
-        </p>
-        <p>
-          {t("Notre approche artistique s’inspire du processus créatif du studio de musique : nourrie par l’intuition et liberté, guidée par l’exigence et la précision, sans aucun compromis sur les détails.", "Our artistic approach draws inspiration from the creative process of the music studio: driven by intuition and freedom, guided by exacting standards and precision, without compromising on any detail.")}
-        </p>
-        <button className="dark-button" onClick={() => onInquire(null)}>
-          {t("Nous contacter", "Contact us")} <ArrowUpRight size={18} />
-        </button>
-      </div>
-    </Modal>
-  );
-}
-
 export default function App() {
   const { language, t } = useLanguage();
   const { theme: museumTheme } = useTheme();
@@ -213,7 +187,9 @@ export default function App() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [viewedIndex, setViewedIndex] = useState(0);
   const [navigationId, setNavigationId] = useState(0);
-  const [view, setView] = useState("gallery");
+  const [view, setView] = useState(readMainRoute);
+  const currentView = useRef(view);
+  currentView.current = view;
   const [ready, setReady] = useState(false);
   const [focused, setFocused] = useState(false);
   const [inspecting, setInspecting] = useState(false);
@@ -240,8 +216,12 @@ export default function App() {
   useEffect(() => {
     document.title = photographerId
       ? `${photographers[photographerId].name} — Cut Off Gallery`
-      : t("Cut Off Gallery — Le son. L’instant.", "Cut Off Gallery — Sound. Still.");
-  }, [photographerId, t]);
+      : view === "about"
+        ? "About — Cut Off Gallery"
+        : view === "collection"
+          ? t("La collection — Cut Off Gallery", "The collection — Cut Off Gallery")
+          : t("Cut Off Gallery — Le son. L’instant.", "Cut Off Gallery — Sound. Still.");
+  }, [photographerId, view, t]);
   const cancelApproach = useCallback(() => {
     clearTimeout(approachTimer.current);
     approachTimer.current = null;
@@ -249,6 +229,31 @@ export default function App() {
     setDetailZoom(false);
   }, []);
   useEffect(() => () => clearTimeout(approachTimer.current), []);
+  const showMainView = useCallback((nextView) => {
+    cancelApproach();
+    currentView.current = nextView;
+    setView(nextView);
+    setModal(null);
+    setFocused(false);
+    setInspecting(false);
+    setImmersive(false);
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  }, [cancelApproach]);
+  const navigateToView = useCallback((nextView, replace = false) => {
+    const hash = nextView === "gallery" ? "" : `#/${nextView}`;
+    const alreadyHere = window.location.hash === hash
+      || (nextView === "gallery" && window.location.hash === "#/");
+    if (!alreadyHere) {
+      window.history[replace ? "replaceState" : "pushState"](
+        { ...window.history.state, cutoffProfile: false },
+        "",
+        window.location.pathname + window.location.search + hash,
+      );
+    }
+    profileRoute.current = null;
+    setPhotographerId(null);
+    showMainView(nextView);
+  }, [showMainView]);
   const closeModal = useCallback(() => {
     setModal(null);
     cancelApproach();
@@ -261,6 +266,11 @@ export default function App() {
           profileReturn.current = { modal: currentModal.current, element: document.activeElement };
         }
         setModal(null);
+      } else {
+        const nextView = readMainRoute();
+        // A profile returns to its existing viewing context. Main-page history
+        // changes instead reset the room and open the requested page at the top.
+        if (nextView !== currentView.current) showMainView(nextView);
       }
       profileRoute.current = id;
       setPhotographerId(id);
@@ -271,7 +281,7 @@ export default function App() {
       window.removeEventListener("popstate", syncRoute);
       window.removeEventListener("hashchange", syncRoute);
     };
-  }, []);
+  }, [showMainView]);
   const openPhotographer = useCallback((profile) => {
     profileReturn.current = { modal, element: document.activeElement };
     cancelApproach();
@@ -283,11 +293,9 @@ export default function App() {
   const closePhotographer = useCallback(() => {
     if (window.history.state?.cutoffProfile) window.history.back();
     else {
-      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
-      profileRoute.current = null;
-      setPhotographerId(null);
+      navigateToView("gallery", true);
     }
-  }, []);
+  }, [navigateToView]);
   useEffect(() => {
     if (photographerId) {
       profileWasOpen.current = true;
@@ -353,7 +361,9 @@ export default function App() {
       setActiveIndex(index);
       setViewedIndex(index);
       setNavigationId((id) => id + 1);
-      if (inGallery) setView("gallery");
+      // Replace the profile entry rather than going Back asynchronously: a
+      // pending history event must not restore Collection over this artwork.
+      if (inGallery) navigateToView("gallery", true);
       if (view !== "gallery" && !inGallery) {
         setModal("artwork");
         return;
@@ -367,7 +377,7 @@ export default function App() {
         approachTimer.current = null;
       }, 1150);
     },
-    [view, reducedMotion, cancelApproach],
+    [view, reducedMotion, cancelApproach, navigateToView],
   );
   const navigate = useCallback(
     (direction) => {
@@ -394,7 +404,7 @@ export default function App() {
   useEffect(() => {
     const handler = (e) => {
       if (
-        e.defaultPrevented || modal || photographer ||
+        view !== "gallery" || e.defaultPrevented || modal || photographer ||
         e.altKey || e.ctrlKey || e.metaKey || e.shiftKey ||
         e.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)
       ) return;
@@ -455,15 +465,14 @@ export default function App() {
     };
   }, [immersive]);
   const goHome = () => {
-    setView("gallery");
-    setImmersive(false);
+    navigateToView("gallery");
     select(0);
   };
-  const activeNavigation = modal === "about" ? "about" : view;
+  const activeNavigation = view;
   return (
     <>
     <div
-      className={`site-shell ${view === "gallery" ? "museum-mode" : "collection-mode"} ${immersive ? "immersive-mode" : ""} ${approaching ? "approaching-artwork" : ""} ${inspecting ? "inspecting-artwork" : ""}`}
+      className={`site-shell ${view === "gallery" ? "museum-mode" : view === "about" ? "about-mode" : "collection-mode"} ${immersive ? "immersive-mode" : ""} ${approaching ? "approaching-artwork" : ""} ${inspecting ? "inspecting-artwork" : ""}`}
       data-theme={museumTheme}
       inert={Boolean(photographer)}
       aria-hidden={photographer ? true : undefined}
@@ -474,34 +483,21 @@ export default function App() {
           <button
             className={activeNavigation === "gallery" ? "nav-link active" : "nav-link"}
             aria-current={activeNavigation === "gallery" ? "page" : undefined}
-            onClick={() => {
-              cancelApproach();
-              setView("gallery");
-              setFocused(false);
-              setInspecting(false);
-            }}
+            onClick={() => navigateToView("gallery")}
           >
             {t("La galerie", "The gallery")}
           </button>
           <button
             className={activeNavigation === "collection" ? "nav-link active" : "nav-link"}
             aria-current={activeNavigation === "collection" ? "page" : undefined}
-            onClick={() => {
-              cancelApproach();
-              setView("collection");
-              setFocused(false);
-              setInspecting(false);
-            }}
+            onClick={() => navigateToView("collection")}
           >
             {t("La collection", "The collection")}
           </button>
           <button
             className={activeNavigation === "about" ? "nav-link active" : "nav-link"}
             aria-current={activeNavigation === "about" ? "page" : undefined}
-            onClick={() => {
-              cancelApproach();
-              setModal("about");
-            }}
+            onClick={() => navigateToView("about")}
           >
             About
           </button>
@@ -553,8 +549,6 @@ export default function App() {
                   artwork={selected}
                   approaching={approaching}
                   detailZoom={detailZoom}
-                  detailAvailable={detailAvailable}
-                  onToggleDetailZoom={() => setDetailZoom((zoomed) => !zoomed)}
                   onBack={leaveInspection}
                   onExplore={() => setModal("artwork")}
                   onInquire={inquire}
@@ -625,7 +619,7 @@ export default function App() {
               </div>
             </div>
           </section>
-        ) : (
+        ) : view === "collection" ? (
           <section className="collection" aria-label={t("Toutes les photographies", "All photographs")}>
             <div className="collection-heading">
               <span className="eyebrow">
@@ -633,7 +627,7 @@ export default function App() {
               </span>
               <button
                 className="text-button"
-                onClick={() => setView("gallery")}
+                onClick={() => navigateToView("gallery")}
               >
                 {t("Retour à la galerie", "Back to the gallery")} <MoveUpRight size={15} />
               </button>
@@ -665,6 +659,12 @@ export default function App() {
               ))}
             </div>
           </section>
+        ) : (
+          <AboutPage
+            onInquire={inquire}
+            onCollection={() => navigateToView("collection")}
+            onGallery={() => navigateToView("gallery")}
+          />
         )}
       </main>
       {modal === "artwork" && (
@@ -678,7 +678,6 @@ export default function App() {
       {modal === "inquiry" && (
         <Inquiry artwork={localizeArtwork(inquiryArtwork, language)} onClose={closeModal} />
       )}
-      {modal === "about" && <About onClose={closeModal} onInquire={inquire} />}
     </div>
     {photographer && (
       <PhotographerProfile
@@ -687,7 +686,6 @@ export default function App() {
         onBack={closePhotographer}
         onSelectArtwork={(artwork) => {
           profileReturn.current = { focusInspection: true };
-          closePhotographer();
           openWork(artworks.findIndex((work) => work.id === artwork.id), true);
         }}
       />
