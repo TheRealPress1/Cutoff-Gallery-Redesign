@@ -1,6 +1,6 @@
-# Cut Off Gallery — Sound. Still.
+# Cut Off Gallery
 
-An interactive gallery concept built with React, Vite, and Three.js.
+A photography collection and interactive gallery built with React, Vite, and Three.js.
 
 ## Run
 
@@ -35,8 +35,10 @@ vercel deploy --prod --scope timetospammyline-7173s-projects
 
 ## Experience
 
-- French is the default on every fresh page load. The French/US flag control switches languages through a brief spinning globe animation, updating interface text, artwork descriptions, photographer biographies, print controls, accessibility labels, and inquiry templates without leaving the current view. Separate inquiry messages and subjects preserve edits in each language.
-- A hexagonal 3D museum room with six framed photographs, individual spotlights, and smooth camera navigation. Dark mode retains the original stone floor and subtle radial seams. Light mode has natural oak floorboards, fine wood grain, and staggered joints. The moon/sun control animates between dark and warm cream surroundings with a soft chalk ceiling, while preserving the photographs’ lighting, colors, and camera position. Dark mode is the default for a first visit. The selected theme follows every screen: the collection, photographer profiles, print studio, About, and inquiry composer. It is remembered on refresh when browser storage is available. Theme and language controls sit on the right of each header or dialog; the expand/restore button brings the main navigation bar back when leaving immersive view.
+- The landing page at `/` reproduces the original gallery’s white header, serif navigation, full-width slideshow, scrolling edition line, photography grid, introduction, and footer. The 3D museum is a separate page at `#/gallery`, accessible from “Galerie” in the header. Slideshow controls support touch swipes, arrow keys, pause, and reduced motion. Newsletter signup and legal links lead to the original site; no new subscription backend is configured.
+
+- French is the default on every fresh page load. The header’s globe/language dropdown switches French and English; dialog flag controls use a brief spinning globe animation, updating interface text, artwork descriptions, photographer biographies, print controls, accessibility labels, and inquiry templates without leaving the current view. Separate inquiry messages and subjects preserve edits in each language.
+- A hexagonal 3D museum room with six framed photographs, individual spotlights, and smooth camera navigation. Dark mode retains the original stone floor and subtle radial seams. Light mode has natural oak floorboards, fine wood grain, and staggered joints. The moon/sun control animates between dark and warm cream surroundings with a soft chalk ceiling, while preserving the photographs’ lighting, colors, and camera position. Light mode is the default for a first visit. The preference key is versioned so older automatically saved dark defaults reset once; new choices persist. The selected theme follows every screen: the collection, photographer profiles, print studio, About, and inquiry composer. It is remembered on refresh when browser storage is available. Theme and language controls sit on the right of each header or dialog; the expand/restore button brings the main navigation bar back when leaving immersive view.
 - Click a photograph or its museum label to approach it in the room. Its physical frame stays in 3D on the left, with the story, photographer, edition, paper, and dimensions alongside it. On phones, the wall label sits below the work.
 - Click a detail in the focused photograph to magnify it 2.5× inside the same frame. A magnifying-glass button appears at the photograph’s top-right on hover or keyboard focus, and stays visible on touchscreens. Drag to inspect the original image; the frame, wall, camera, and information panel stay fixed. The zoom-out icon, Escape, Down arrow, or a zoom-out gesture restores the whole photograph. Zoom and pan stay inside the image boundaries, with smooth reversible transitions and reduced-motion support.
 - “Explore the print” opens a separate studio view with front, left, and right frame perspectives. The angled frame is a visualization, not additional product photography.
@@ -56,7 +58,7 @@ vercel deploy --prod --scope timetospammyline-7173s-projects
 
 ## Content
 
-The original Cut Off Gallery wordmark is sourced from the existing gallery site's header, stored in `public/brand/cutoff-gallery.png`, and displayed in white against the dark headers.
+The original Cut Off Gallery wordmark is sourced from the existing gallery site's header, stored in `public/brand/cutoff-gallery.png`, and adapts to white or dark headers. The original site uses Orpheus Pro; the restored header and homepage use Cormorant Garamond as a close open-font substitute, with Georgia as the local fallback. The Justice slideshow image is copied from the original homepage into `public/home/`; the other slides reuse the collection assets.
 
 Actual gallery photographs and credits are in `src/data/artworks.js`; assets are hosted locally in `public/artworks/`. Each record links to its original gallery entry. Photography remains the property of its respective rights holders.
 

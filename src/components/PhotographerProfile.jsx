@@ -39,9 +39,9 @@ export default function PhotographerProfile({ photographer, artworks = [], onBac
         </button>
         <span className="photographer-profile-context">{t('Les photographes', 'The photographers')}</span>
         <div className="photographer-profile-header-actions">
-          <button type="button" className="photographer-profile-back" onClick={onBack} aria-label={t('Retour à la galerie', 'Back to gallery')}>
+          <button type="button" className="photographer-profile-back" onClick={onBack} aria-label={t('Retour', 'Back')}>
             <ArrowLeft size={15} strokeWidth={1.5} aria-hidden="true" />
-            <span>{t('Retour à la galerie', 'Back to gallery')}</span>
+            <span>{t('Retour', 'Back')}</span>
           </button>
           <AppearanceControls />
         </div>
@@ -131,7 +131,7 @@ export default function PhotographerProfile({ photographer, artworks = [], onBac
 
       <footer className="photographer-profile-footer">
         <button type="button" className="photographer-profile-back" onClick={onBack}>
-          <ArrowLeft size={15} strokeWidth={1.5} aria-hidden="true" /> {t('Retour à la galerie', 'Back to gallery')}
+          <ArrowLeft size={15} strokeWidth={1.5} aria-hidden="true" /> {t('Retour', 'Back')}
         </button>
         {sources.length > 0 && <div className="photographer-profile-sources" aria-label={t('Sources biographiques', 'Biography sources')}>
           <span>{t('Pour aller plus loin', 'Further reading')}</span>

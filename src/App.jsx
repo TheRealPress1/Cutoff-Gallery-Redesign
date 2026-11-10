@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -9,15 +9,14 @@ import {
   MoveUpRight,
   ScanLine,
 } from "lucide-react";
-import GalleryScene from "./components/GalleryScene.jsx";
-import GalleryLogo from "./components/GalleryLogo.jsx";
 import GalleryInspection from "./components/GalleryInspection.jsx";
 import PrintViewer from "./components/PrintViewer.jsx";
 import PhotographerCredit from "./components/PhotographerCredit.jsx";
 import PhotographerProfile from "./components/PhotographerProfile.jsx";
 import AppearanceControls from "./components/AppearanceControls.jsx";
-import SlidingNavigation from "./components/SlidingNavigation.jsx";
 import AboutPage from "./components/AboutPage.jsx";
+import HomePage from "./components/HomePage.jsx";
+import SiteHeader from "./components/SiteHeader.jsx";
 import { useLanguage } from "./i18n.jsx";
 import { useTheme } from "./theme.jsx";
 import { artworks } from "./data/artworks.js";
@@ -26,10 +25,13 @@ import { photographers } from "./data/photographers.js";
 import { localizeArtwork, localizePhotographer } from "./data/translations.js";
 import "./museum-theme.css";
 
+const GalleryScene = lazy(() => import("./components/GalleryScene.jsx"));
+
 const readMainRoute = () => {
   if (window.location.hash === "#/about") return "about";
   if (window.location.hash === "#/collection") return "collection";
-  return "gallery";
+  if (window.location.hash === "#/gallery") return "gallery";
+  return "home";
 };
 
 const readPhotographerRoute = () => {
@@ -37,19 +39,6 @@ const readPhotographerRoute = () => {
   const id = window.location.hash.startsWith(prefix) ? window.location.hash.slice(prefix.length) : null;
   return Object.hasOwn(photographers, id) ? id : null;
 };
-
-function Brand({ onClick }) {
-  const { t } = useLanguage();
-  return (
-    <button
-      className="brand"
-      onClick={onClick}
-      aria-label={t("Accueil Cut Off Gallery", "Cut Off Gallery home")}
-    >
-      <GalleryLogo />
-    </button>
-  );
-}
 
 function Modal({ children, onClose, className = "", label, fullScreen = false }) {
   const { t } = useLanguage();
@@ -220,7 +209,9 @@ export default function App() {
         ? "About — Cut Off Gallery"
         : view === "collection"
           ? t("La collection — Cut Off Gallery", "The collection — Cut Off Gallery")
-          : t("Cut Off Gallery — Le son. L’instant.", "Cut Off Gallery — Sound. Still.");
+          : view === "gallery"
+            ? t("La galerie — Cut Off Gallery", "The gallery — Cut Off Gallery")
+            : "Cut Off Gallery";
   }, [photographerId, view, t]);
   const cancelApproach = useCallback(() => {
     clearTimeout(approachTimer.current);
@@ -231,6 +222,7 @@ export default function App() {
   useEffect(() => () => clearTimeout(approachTimer.current), []);
   const showMainView = useCallback((nextView) => {
     cancelApproach();
+    if (nextView === "gallery" && currentView.current !== "gallery") setReady(false);
     currentView.current = nextView;
     setView(nextView);
     setModal(null);
@@ -240,9 +232,9 @@ export default function App() {
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "instant" }));
   }, [cancelApproach]);
   const navigateToView = useCallback((nextView, replace = false) => {
-    const hash = nextView === "gallery" ? "" : `#/${nextView}`;
+    const hash = nextView === "home" ? "" : `#/${nextView}`;
     const alreadyHere = window.location.hash === hash
-      || (nextView === "gallery" && window.location.hash === "#/");
+      || (nextView === "home" && window.location.hash === "#/");
     if (!alreadyHere) {
       window.history[replace ? "replaceState" : "pushState"](
         { ...window.history.state, cutoffProfile: false },
@@ -293,7 +285,7 @@ export default function App() {
   const closePhotographer = useCallback(() => {
     if (window.history.state?.cutoffProfile) window.history.back();
     else {
-      navigateToView("gallery", true);
+      navigateToView("home", true);
     }
   }, [navigateToView]);
   useEffect(() => {
@@ -343,17 +335,6 @@ export default function App() {
       setInspecting(false);
     },
     [cancelApproach, viewedIndex],
-  );
-  const select = useCallback(
-    (index) => {
-      cancelApproach();
-      setActiveIndex(index);
-      setViewedIndex(index);
-      setNavigationId((id) => id + 1);
-      setFocused(false);
-      setInspecting(false);
-    },
-    [cancelApproach],
   );
   const openWork = useCallback(
     (index, inGallery = false) => {
@@ -464,46 +445,20 @@ export default function App() {
       document.body.style.overflow = old;
     };
   }, [immersive]);
-  const goHome = () => {
-    navigateToView("gallery");
-    select(0);
-  };
-  const activeNavigation = view;
   return (
     <>
     <div
-      className={`site-shell ${view === "gallery" ? "museum-mode" : view === "about" ? "about-mode" : "collection-mode"} ${immersive ? "immersive-mode" : ""} ${approaching ? "approaching-artwork" : ""} ${inspecting ? "inspecting-artwork" : ""}`}
+      className={`site-shell ${view === "gallery" ? "museum-mode" : view === "about" ? "about-mode" : view === "collection" ? "collection-mode" : "home-mode"} ${immersive ? "immersive-mode" : ""} ${approaching ? "approaching-artwork" : ""} ${inspecting ? "inspecting-artwork" : ""}`}
       data-theme={museumTheme}
       inert={Boolean(photographer)}
       aria-hidden={photographer ? true : undefined}
     >
-      <header className="site-header" inert={immersive} aria-hidden={immersive || undefined}>
-        <Brand onClick={goHome} />
-        <SlidingNavigation activeItem={activeNavigation}>
-          <button
-            className={activeNavigation === "gallery" ? "nav-link active" : "nav-link"}
-            aria-current={activeNavigation === "gallery" ? "page" : undefined}
-            onClick={() => navigateToView("gallery")}
-          >
-            {t("La galerie", "The gallery")}
-          </button>
-          <button
-            className={activeNavigation === "collection" ? "nav-link active" : "nav-link"}
-            aria-current={activeNavigation === "collection" ? "page" : undefined}
-            onClick={() => navigateToView("collection")}
-          >
-            {t("La collection", "The collection")}
-          </button>
-          <button
-            className={activeNavigation === "about" ? "nav-link active" : "nav-link"}
-            aria-current={activeNavigation === "about" ? "page" : undefined}
-            onClick={() => navigateToView("about")}
-          >
-            About
-          </button>
-        </SlidingNavigation>
-        <AppearanceControls />
-      </header>
+      <SiteHeader
+        view={view}
+        onNavigate={navigateToView}
+        onInquire={() => inquire(null)}
+        immersive={immersive}
+      />
       <main>
         {view === "collection" && (
           <section className="intro collection-intro" aria-label={t("Présentation", "Introduction")}>
@@ -517,33 +472,44 @@ export default function App() {
             </p>
           </section>
         )}
-        {view === "gallery" ? (
+        {view === "home" ? (
+          <HomePage
+            artworks={localizedArtworks}
+            onOpenArtwork={openWork}
+            onAbout={() => navigateToView("about")}
+            onInquire={() => inquire(null)}
+            onGallery={() => navigateToView("gallery")}
+            reducedMotion={reducedMotion}
+          />
+        ) : view === "gallery" ? (
           <section
             className="exhibition"
             aria-label={t("Exposition photographique interactive", "Interactive photography exhibition")}
           >
             <div className="gallery-viewport">
-              <GalleryScene
-                artworks={artworks}
-                activeIndex={activeIndex}
-                navigationId={navigationId}
-                onViewChange={setViewedIndex}
-                onSelect={openWork}
-                onNavigate={navigate}
-                onBackgroundClick={() => detailZoom ? setDetailZoom(false) : leaveInspection()}
-                onReady={(supportsDetail = true) => {
-                  setReady(true);
-                  setDetailAvailable(supportsDetail);
-                  if (!supportsDetail) setDetailZoom(false);
-                }}
-                focused={focused}
-                inspecting={inspecting}
-                approaching={approaching}
-                detailZoom={detailZoom}
-                onDetailZoomChange={setDetailZoom}
-                reducedMotion={reducedMotion}
-                theme={museumTheme}
-              />
+              <Suspense fallback={null}>
+                <GalleryScene
+                  artworks={artworks}
+                  activeIndex={activeIndex}
+                  navigationId={navigationId}
+                  onViewChange={setViewedIndex}
+                  onSelect={openWork}
+                  onNavigate={navigate}
+                  onBackgroundClick={() => detailZoom ? setDetailZoom(false) : leaveInspection()}
+                  onReady={(supportsDetail = true) => {
+                    setReady(true);
+                    setDetailAvailable(supportsDetail);
+                    if (!supportsDetail) setDetailZoom(false);
+                  }}
+                  focused={focused}
+                  inspecting={inspecting}
+                  approaching={approaching}
+                  detailZoom={detailZoom}
+                  onDetailZoomChange={setDetailZoom}
+                  reducedMotion={reducedMotion}
+                  theme={museumTheme}
+                />
+              </Suspense>
               {inspecting && (
                 <GalleryInspection
                   artwork={selected}
